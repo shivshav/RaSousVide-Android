@@ -12,6 +12,12 @@
         <item>F</item>
         <item>C</item>
     </string-array>
+    <string-array name="sliding_tab_names">
+        <item>Sous Vide</item>
+        <item>Crock Pot</item>
+        <item>Manual</item>
+    </string-array>
+    <string name="title_activity_main">MainActivity</string>
 
 
 
