@@ -1,7 +1,5 @@
 package com.spazz.shiv.rasousvide;
 
-import java.util.Locale;
-
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,6 +11,7 @@ import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
