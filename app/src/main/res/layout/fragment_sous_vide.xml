@@ -3,9 +3,8 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:seekarc="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
     <android.support.v7.widget.CardView
         android:id="@+id/cardview"
         android:layout_width="match_parent"
@@ -13,23 +12,151 @@
         android:layout_margin="8dp"
         card_view:cardBackgroundColor="@android:color/white"
         card_view:cardCornerRadius="8dp">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <FrameLayout
+                    android:id="@+id/seek_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    tools:layout_height="200dp">
+                    <com.triggertrap.seekarc.SeekArc
+                        android:id="@+id/seekArcTemp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:padding="30dp"
+                        seekarc:rotation="180"
+                        seekarc:startAngle="30"
+                        seekarc:sweepAngle="300"
+                        seekarc:touchInside="false" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+                        <TextView
+                            android:id="@+id/tempLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_centerInParent="true"
+                            android:padding="8dp"
+                            android:text="Temperature" />
+                        <TextView
+                            android:id="@+id/seekTempText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tempLabel"
+                            android:layout_centerInParent="true"
+                            android:layout_gravity="center"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:paddingLeft="8dp"
+                            android:paddingRight="2dp"
+                            tools:text="90" />
+                        <TextView
+                            android:id="@+id/seekTempUnits"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tempLabel"
+                            android:layout_toRightOf="@id/seekTempText"
+                            android:layout_centerInParent="true"
+                            android:layout_gravity="center"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:paddingLeft="2dp"
+                            android:paddingRight="8dp"
+                            android:text="\u00B0F" />
+                    </RelativeLayout>
+                </FrameLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:id="@+id/meal_divider"
+                    android:background="@drawable/divider"
+                    android:layout_below="@id/seek_layout"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/meal_heading"
+                    android:layout_below="@id/meal_divider"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center_horizontal"
+                    android:textColor="#000000"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title.Inverse"
+                    android:text="Desired Meal"
+                    tools:text="Desired Meal"/>
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/meal_spinner"
+                    android:layout_below="@id/meal_heading"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center_horizontal"/>
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/meal_spinner_sub_choice"
+                    android:layout_below="@id/meal_spinner"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center_horizontal"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:id="@+id/pid_divider"
+                    android:background="@drawable/divider"
+                    android:layout_below="@id/meal_spinner_sub_choice"/>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/pid_heading"
+                    android:layout_below="@id/pid_divider"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:gravity="center_horizontal"
+                    android:textColor="#000000"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title.Inverse"
+                    android:text="PID Parameters"
+                    tools:text="PID Parameters"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="60dp"
+                    android:id="@+id/i_param"
+                    android:layout_below="@id/pid_heading"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center_horizontal"
+                    android:inputType="numberDecimal"
+                    android:hint="I"
+                    tools:text="Hey2"/>
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="60dp"
+                    android:id="@+id/k_param"
+                    android:layout_below="@id/pid_heading"
+                    android:layout_toLeftOf="@id/i_param"
+                    android:layout_toStartOf="@id/i_param"
+                    android:gravity="center_horizontal"
+                    android:inputType="numberDecimal"
+                    android:hint="P"
+                    tools:text="Hey1"/>
 
-        <com.triggertrap.seekarc.SeekArc
-            android:id="@+id/seekArcTemp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="30dp"
-            seekarc:rotation="180"
-            seekarc:startAngle="30"
-            seekarc:sweepAngle="300"
-            seekarc:touchInside="true" />
-        <TextView
-            android:id="@+id/seekTempText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:padding="8dp"
-            tools:text="90" />
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="60dp"
+                    android:id="@+id/d_param"
+                    android:layout_below="@id/pid_heading"
+                    android:layout_toRightOf="@id/i_param"
+                    android:layout_toEndOf="@id/i_param"
+                    android:layout_centerInParent="true"
+                    android:gravity="center_horizontal"
+                    android:inputType="numberDecimal"
+                    android:hint="D"
+                    tools:text="Hey3"/>
+            </RelativeLayout>
     </android.support.v7.widget.CardView>
 </FrameLayout>

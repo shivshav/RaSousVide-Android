@@ -74,6 +74,7 @@ public class SousVideFragment extends Fragment {
         ButterKnife.inject(this, rootView);
         ViewCompat.setElevation(rootView, 50);
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
+
         seekArcTemp.setProgress(0);
         //seekTempText.setText("Placeholder son!");
         return rootView;
