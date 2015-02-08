@@ -1,5 +1,7 @@
 package com.spazz.shiv.rasousvide;
 
+import android.graphics.Outline;
+import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -9,6 +11,9 @@ import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.view.ViewOutlineProvider;
+import android.widget.ImageButton;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
@@ -25,9 +30,11 @@ public class MainActivity extends ActionBarActivity {
     PagerSlidingTabStrip tabs;
     @InjectView(R.id.pager)
     ViewPager pager;
+
     @InjectView(R.id.toolbar_bottom)
     Toolbar bottomToolbar;
-
+    @InjectView(R.id.send_button)
+    ImageButton sendButton;
 
     private TabsPagerAdapter mAdapter;
 
@@ -48,8 +55,23 @@ public class MainActivity extends ActionBarActivity {
 //        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
 //                .getDisplayMetrics());
 //        pager.setPageMargin(pageMargin);
+        setupBottomToolbar();
     }
 
+    private void setupBottomToolbar() {
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, Outline outline) {
+                    // Or read size directly from the view's width/height
+                    int size = getResources().getDimensionPixelSize(R.dimen.round_button_diameter);
+                    outline.setOval(0, 0, size, size);
+                }
+            };
+            sendButton.setOutlineProvider(viewOutlineProvider);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

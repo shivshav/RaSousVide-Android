@@ -1,6 +1,7 @@
 package com.spazz.shiv.rasousvide.tabs;
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -74,7 +75,6 @@ public class SousVideFragment extends Fragment {
         ButterKnife.inject(this, rootView);
         ViewCompat.setElevation(rootView, 50);
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
-
         seekArcTemp.setProgress(0);
         //seekTempText.setText("Placeholder son!");
         return rootView;

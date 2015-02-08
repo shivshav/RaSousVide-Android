@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
+        android:elevation="4dp"
         app:pstsPaddingMiddle="true" />
 
     <android.support.v4.view.ViewPager
@@ -23,5 +24,20 @@
         android:layout_weight="1"
         tools:context="com.spazz.shiv.rasousvide.MainActivity" />
 
+    <ImageButton
+        android:id="@+id/send_button"
+        android:layout_width="@dimen/round_button_diameter"
+        android:layout_height="@dimen/round_button_diameter"
+        android:layout_gravity="end"
+        android:layout_marginBottom="-28dp"
+        android:layout_marginEnd="@dimen/add_button_margin"
+        android:layout_marginRight="@dimen/add_button_margin"
+        android:tint="@android:color/white"
+        android:stateListAnimator="@anim/button_ripple"
+        android:background="@drawable/oval_ripple"
+        android:elevation="@dimen/elevation_high"
+        android:src="@drawable/ic_send"
+        android:contentDescription="The button that causes the app to send a request to the raspberry pi"/>
     <include layout="@layout/toolbar_bottom"/>
+
 </LinearLayout>
