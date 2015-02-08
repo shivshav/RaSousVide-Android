@@ -6,22 +6,59 @@
     android:id="@+id/toolbar_bottom"
     android:theme="@style/Widget.AppCompat.Toolbar"
     android:background="@color/color_primary_dark"
+    android:layout_gravity="bottom"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_alignParentBottom="true"
     android:minHeight="?attr/actionBarSize">
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/temp_label"
-            android:textStyle="bold"
-            android:gravity="top"
+            android:layout_height="wrap_content"
+            android:id="@+id/mode_label"
             android:layout_marginTop="4dp"
-            android:textColor="#FFFFFF"
+            android:textColor="#CCFFFFFF"
+            android:text="Current Mode: "/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/current_mode"
+            android:textStyle="bold"
+            android:layout_toRightOf="@id/mode_label"
+            android:layout_toEndOf="@id/mode_label"
+            android:layout_marginTop="4dp"
+            android:textColor="#CCFFFFFF"
+            android:text="Auto"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/temp_label"
+            android:layout_below="@id/mode_label"
+            android:layout_marginTop="4dp"
+            android:textColor="#CCFFFFFF"
             android:text="Current Water Temperature: "/>
-    </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/current_temp"
+            android:layout_below="@id/mode_label"
+            android:textStyle="bold"
+            android:layout_toRightOf="@id/temp_label"
+            android:layout_toEndOf="@id/temp_label"
+            android:layout_marginTop="4dp"
+            android:textColor="#CCFFFFFF"
+            android:text="257"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/current_temp_units"
+            android:textStyle="bold"
+            android:layout_below="@id/mode_label"
+            android:layout_toRightOf="@id/current_temp"
+            android:layout_toEndOf="@id/temp_label"
+            android:layout_marginTop="4dp"
+            android:textColor="#CCFFFFFF"
+            android:text="\u00B0F"/>
+    </RelativeLayout>
 </android.support.v7.widget.Toolbar>

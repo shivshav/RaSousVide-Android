@@ -1,5 +1,6 @@
 package com.spazz.shiv.rasousvide;
 
+import android.annotation.TargetApi;
 import android.graphics.Outline;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -59,7 +60,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void setupBottomToolbar() {
-
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
                 @Override
