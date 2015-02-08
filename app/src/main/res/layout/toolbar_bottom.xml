@@ -1,64 +1,71 @@
-<?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.Toolbar
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbar_bottom"
-    android:theme="@style/Widget.AppCompat.Toolbar"
     android:background="@color/color_primary_dark"
-    android:layout_gravity="bottom"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?attr/actionBarSize">
+    android:padding="4dp"
+    android:layout_gravity="bottom"
+    android:minHeight="?attr/actionBarSize" >
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/mode_label"
-            android:layout_marginTop="4dp"
+            android:id="@+id/current_mode_label"
+            android:layout_margin="4dp"
             android:textColor="#CCFFFFFF"
-            android:text="Current Mode: "/>
+            android:text="Current Mode:"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/current_mode"
-            android:textStyle="bold"
-            android:layout_toRightOf="@id/mode_label"
-            android:layout_toEndOf="@id/mode_label"
-            android:layout_marginTop="4dp"
+            android:layout_toRightOf="@id/current_mode_label"
+            android:layout_toEndOf="@id/current_mode_label"
+            android:layout_margin="4dp"
             android:textColor="#CCFFFFFF"
+            android:textStyle="bold"
             android:text="Auto"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/temp_label"
-            android:layout_below="@id/mode_label"
-            android:layout_marginTop="4dp"
+            android:id="@+id/current_temp_label"
+            android:layout_below="@id/current_mode_label"
+            android:padding="4dp"
             android:textColor="#CCFFFFFF"
-            android:text="Current Water Temperature: "/>
+            android:text="Current Water Temperature:"/>
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/current_temp"
-            android:layout_below="@id/mode_label"
-            android:textStyle="bold"
-            android:layout_toRightOf="@id/temp_label"
-            android:layout_toEndOf="@id/temp_label"
-            android:layout_marginTop="4dp"
-            android:textColor="#CCFFFFFF"
-            android:text="257"/>
-        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/current_temp_units"
-            android:textStyle="bold"
-            android:layout_below="@id/mode_label"
-            android:layout_toRightOf="@id/current_temp"
-            android:layout_toEndOf="@id/temp_label"
-            android:layout_marginTop="4dp"
+            android:layout_below="@id/current_mode_label"
+            android:layout_toRightOf="@id/current_temp_label"
+            android:layout_toEndOf="@id/current_temp_label"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="2dp"
             android:textColor="#CCFFFFFF"
+            android:textStyle="bold"
+            android:text="267"/>
+        <TextView
+            android:id="@+id/current_temp_units"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/current_mode_label"
+            android:layout_toRightOf="@id/current_temp"
+            android:layout_toEndOf="@id/current_temp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="2dp"
+            android:textColor="#CCFFFFFF"
+            android:textStyle="bold"
             android:text="\u00B0F"/>
     </RelativeLayout>
 </android.support.v7.widget.Toolbar>

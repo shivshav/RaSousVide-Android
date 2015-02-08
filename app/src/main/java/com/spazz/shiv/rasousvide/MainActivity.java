@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
@@ -34,6 +35,9 @@ public class MainActivity extends ActionBarActivity {
 
     @InjectView(R.id.toolbar_bottom)
     Toolbar bottomToolbar;
+//    @InjectView(R.id.bottom_layout)
+//    RelativeLayout bottomLayout;
+
     @InjectView(R.id.send_button)
     ImageButton sendButton;
 
