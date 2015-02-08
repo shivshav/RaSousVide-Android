@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.spazz.shiv.rasousvide.R;
+import com.triggertrap.seekarc.SeekArc;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -29,8 +30,10 @@ public class SousVideFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
 
-    @InjectView(R.id.textView)
-    TextView textView;
+    @InjectView(R.id.seekArcTemp)
+    SeekArc seekArcTemp;
+    @InjectView(R.id.seekTempText)
+    TextView seekTempText;
     // TODO: Rename and change types of parameters
     private int position;
 
@@ -70,7 +73,9 @@ public class SousVideFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_sous_vide, container, false);
         ButterKnife.inject(this, rootView);
         ViewCompat.setElevation(rootView, 50);
-        textView.setText("Placeholder son!");
+        seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
+        seekArcTemp.setProgress(0);
+        //seekTempText.setText("Placeholder son!");
         return rootView;
     }
 
@@ -98,6 +103,23 @@ public class SousVideFragment extends Fragment {
 //        mListener = null;
     }
 
+    private class MyOnSeekArcChangeListener implements SeekArc.OnSeekArcChangeListener {
+
+        @Override
+        public void onStopTrackingTouch(SeekArc seekArc) {
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekArc seekArc) {
+        }
+
+        @Override
+        public void onProgressChanged(SeekArc seekArc, int progress,
+                                      boolean fromUser) {
+            seekTempText.setText(String.valueOf(progress));
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -112,5 +134,6 @@ public class SousVideFragment extends Fragment {
 //        // TODO: Update argument type and name
 //        public void onFragmentInteraction(Uri uri);
 //    }
+
 
 }
