@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
@@ -22,6 +25,7 @@ import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -37,6 +41,10 @@ public class MainActivity extends ActionBarActivity {
     Toolbar bottomToolbar;
 //    @InjectView(R.id.bottom_layout)
 //    RelativeLayout bottomLayout;
+
+    //TODO: This should only show when status changes from 'Off' to something else
+    @InjectView(R.id.stop_button)
+    ImageButton stopButton;
 
     @InjectView(R.id.send_button)
     ImageButton sendButton;
@@ -61,8 +69,30 @@ public class MainActivity extends ActionBarActivity {
 //                .getDisplayMetrics());
 //        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
+        setupStopAnimation();
     }
 
+    private void setupStopAnimation(){
+        final Animation animation = new AlphaAnimation(1.0f, 0.25f); // Change alpha from fully visible to invisible
+        animation.setDuration(1500); // duration - a second
+        animation.setInterpolator(new LinearInterpolator()); // do not alter animation rate
+        animation.setRepeatCount(Animation.INFINITE); // Repeat animation infinitely
+        animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
+        stopButton.startAnimation(animation);
+
+
+//        stopButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(final View view) {
+//                view.clearAnimation();
+//            }
+//        });
+    }
+
+    @OnClick(R.id.stop_button)
+    public void stopClicked(View view) {
+        view.clearAnimation();
+    }
     private void setupBottomToolbar() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {

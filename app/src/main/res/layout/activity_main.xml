@@ -27,6 +27,7 @@
         android:layout_below="@id/toolbar"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark"
         app:pstsPaddingMiddle="true" />
 
     <android.support.v4.view.ViewPager
@@ -37,6 +38,7 @@
         android:layout_below="@id/tabs"
         android:layout_above="@id/toolbar_bottom"
         tools:context="com.spazz.shiv.rasousvide.MainActivity" />
+
     <ImageButton
         android:id="@+id/send_button"
         android:layout_width="@dimen/round_button_diameter"
@@ -48,11 +50,28 @@
         android:layout_marginBottom="-28dp"
         android:layout_marginEnd="@dimen/add_button_margin"
         android:layout_marginRight="@dimen/add_button_margin"
-        android:tint="@color/LightGrey"
+        android:tint="@color/color_accent"
         android:stateListAnimator="@anim/button_ripple"
         android:background="@drawable/oval_ripple"
         android:elevation="@dimen/elevation_high"
         android:src="@drawable/ic_send"
+        android:contentDescription="The button that causes the app to send a request to the raspberry pi"/>
+    <ImageButton
+        android:id="@+id/stop_button"
+        android:layout_width="@dimen/round_button_diameter"
+        android:layout_height="@dimen/round_button_diameter"
+        android:layout_gravity="end"
+        android:layout_above="@id/send_button"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="@dimen/add_button_margin"
+        android:layout_marginRight="@dimen/add_button_margin"
+        android:tint="@color/DebugRed"
+        android:stateListAnimator="@anim/button_ripple"
+        android:background="@drawable/oval_ripple"
+        android:elevation="@dimen/elevation_high"
+        android:src="@drawable/ic_stop"
         android:contentDescription="The button that causes the app to send a request to the raspberry pi"/>
 
 </RelativeLayout>
