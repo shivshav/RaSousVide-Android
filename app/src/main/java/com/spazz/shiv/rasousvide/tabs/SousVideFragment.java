@@ -9,13 +9,21 @@ import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.spazz.shiv.rasousvide.R;
+import com.spazz.shiv.rasousvide.database.Meal;
 import com.triggertrap.seekarc.SeekArc;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnItemSelected;
 
 
 /**
@@ -35,7 +43,14 @@ public class SousVideFragment extends Fragment {
     SeekArc seekArcTemp;
     @InjectView(R.id.seekTempText)
     TextView seekTempText;
+    @InjectView(R.id.meal_spinner)
+    Spinner mealSpinner;
+    @InjectView(R.id.meal_spinner_sub_choice)
+    Spinner mealSubChoice;
     // TODO: Rename and change types of parameters
+
+    List<Meal> meals;
+
     private int position;
 
 //    private OnFragmentInteractionListener mListener;
@@ -77,6 +92,7 @@ public class SousVideFragment extends Fragment {
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
         seekArcTemp.setProgress(0);
         //seekTempText.setText("Placeholder son!");
+        setupMealSpinner();
         return rootView;
     }
 
@@ -87,6 +103,33 @@ public class SousVideFragment extends Fragment {
 //        }
     }
 
+    private void setupMealSpinner() {
+        meals = Meal.listAll(Meal.class);
+        List<String> mealNames = new ArrayList<>(meals.size());
+        for(Iterator<Meal> it = meals.iterator(); it.hasNext();){
+            mealNames.add(it.next().getName());
+        }
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_spinner_item, mealNames); //selected item will look like a spinner set from XML
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mealSpinner.setAdapter(spinnerArrayAdapter);
+
+
+    }
+
+    @OnItemSelected(R.id.meal_spinner)
+    void mealSelected(int position) {
+        Meal selectedM = meals.get(position);
+        if(selectedM.getSubType() != null) {
+            mealSubChoice.setVisibility(View.VISIBLE);
+//            List<String> mealTypes = null;
+//            for(Iterator<Meal> it = meals.iterator(); it.hasNext();){
+//                mealNames.add(it.next().getName());
+//            }
+//            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_spinner_item, mealNames); //selected item will look like a spinner set from XML
+//            spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//            mealSpinner.setAdapter(spinnerArrayAdapter);
+        }
+    }
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);

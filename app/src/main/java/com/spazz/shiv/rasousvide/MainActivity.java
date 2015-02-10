@@ -1,6 +1,8 @@
 package com.spazz.shiv.rasousvide;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Outline;
 import android.os.Build;
 import android.support.v7.app.ActionBarActivity;
@@ -21,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.database.Meal;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
 import butterknife.ButterKnife;
@@ -51,6 +54,8 @@ public class MainActivity extends ActionBarActivity {
 
     private TabsPagerAdapter mAdapter;
 
+    private Boolean firstTime = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,8 +75,30 @@ public class MainActivity extends ActionBarActivity {
 //        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
         setupStopAnimation();
+
+        if(isFirstTime()) {
+            //Execute database setup here
+            Meal.firstTimeMealSetup();
+        }
     }
 
+    /**
+     * Checks if the user is opening the app for the first time.
+     * Note that this method should be placed inside an activity and it can be called multiple times.
+     * @return boolean
+     */
+    private boolean isFirstTime() {
+        if (firstTime == null) {
+            SharedPreferences mPreferences = this.getSharedPreferences("first_time", Context.MODE_PRIVATE);
+            firstTime = mPreferences.getBoolean("firstTime", true);
+            if (firstTime) {
+                SharedPreferences.Editor editor = mPreferences.edit();
+                editor.putBoolean("firstTime", false);
+                editor.commit();
+            }
+        }
+        return firstTime;
+    }
     private void setupStopAnimation(){
         final Animation animation = new AlphaAnimation(1.0f, 0.25f); // Change alpha from fully visible to invisible
         animation.setDuration(1500); // duration - a second
