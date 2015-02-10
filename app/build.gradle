@@ -26,4 +26,9 @@ dependencies {
     compile 'com.jpardogo.materialtabstrip:library:1.0.8'
     compile 'com.jakewharton:butterknife:6.0.0'
     compile project(':seekarc')
+    // rest client for http interaction and dependencies
+    compile 'com.squareup.retrofit:retrofit:1.8.0'
+    compile 'com.squareup.okio:okio:1.0.1'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
+    compile 'com.squareup.okhttp:okhttp:2.0.0'
 }

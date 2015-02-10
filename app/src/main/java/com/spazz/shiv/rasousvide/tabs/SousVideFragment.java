@@ -31,10 +31,8 @@ public class SousVideFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
 
-    @InjectView(R.id.seekArcTemp)
-    SeekArc seekArcTemp;
-    @InjectView(R.id.seekTempText)
-    TextView seekTempText;
+    @InjectView(R.id.seekArcTemp) SeekArc seekArcTemp;
+    @InjectView(R.id.seekTempText) TextView seekTempText;
     // TODO: Rename and change types of parameters
     private int position;
 
