@@ -11,6 +11,7 @@ import com.orm.SugarRecord;
  */
 public class Meal extends SugarRecord<Meal> {
 
+    Entree entree;
     String mealType;//This is the meal type (if NULL, then there's only one)
     double setPoint;//in Celsius (NOT NULL)
     long cookTime;
@@ -22,7 +23,8 @@ public class Meal extends SugarRecord<Meal> {
 
     }
 
-    public Meal(String mealType, Double setPoint, Long cookTime, Double kParam, Double dParam, Double iParam) {
+    public Meal(Entree entree, String mealType, Double setPoint, Long cookTime, Double kParam, Double dParam, Double iParam) {
+        this.entree = entree;
         this.mealType = mealType;
         this.setPoint = (setPoint == null? -1: setPoint);
         this.cookTime = (cookTime == null? (long)Time.HOUR: cookTime);
@@ -31,13 +33,17 @@ public class Meal extends SugarRecord<Meal> {
         this.dParam = (dParam == null? 4: dParam);
     }
 
-    public Meal(String name, double setPoint) {
-        this(name, setPoint, null, null, null, null);
+    public Meal(Entree entree, String name, double setPoint) {
+        this(entree, name, setPoint, null, null, null, null);
     }
 
-    public Meal(String mealType, double setPoint, long cookTime) {
-        this(mealType, setPoint, cookTime, null, null, null);
+    public Meal(Entree entree, String mealType, double setPoint, long cookTime) {
+        this(entree, mealType, setPoint, cookTime, null, null, null);
     }
+
+    public Entree getEntree() {return entree;}
+
+    public void setEntree(Entree e) {this.entree = e;}
 
     public String getMealType() {
         return mealType;

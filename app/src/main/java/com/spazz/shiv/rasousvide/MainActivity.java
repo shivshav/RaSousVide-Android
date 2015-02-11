@@ -27,6 +27,9 @@ import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
+import java.util.Iterator;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -62,6 +65,9 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        forceNewEntries();
+        Entree.firstTimeMealSetup();
+
         ButterKnife.inject(this);
 
         //action bar setup
@@ -77,12 +83,25 @@ public class MainActivity extends ActionBarActivity {
         setupBottomToolbar();
         setupStopAnimation();
 
-        if(isFirstTime()) {
-            //Execute database setup here
-            Entree.firstTimeMealSetup();
-        }
+//        if(isFirstTime()) {
+//            //Execute database setup here
+//            Entree.firstTimeMealSetup();
+//        }
     }
 
+    private void forceNewEntries() {
+        List<Meal> mealList = Meal.listAll(Meal.class);
+        if(mealList != null) {
+            Meal.deleteAll(Meal.class);
+        }
+
+        List<Entree> entreeList = Entree.listAll(Entree.class);
+        if(entreeList != null) {
+            Entree.deleteAll(Entree.class);
+        }
+
+
+    }
     /**
      * Checks if the user is opening the app for the first time.
      * Note that this method should be placed inside an activity and it can be called multiple times.
@@ -95,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
             if (firstTime) {
                 SharedPreferences.Editor editor = mPreferences.edit();
                 editor.putBoolean("firstTime", false);
-                editor.commit();
+                editor.apply();
             }
         }
         return firstTime;

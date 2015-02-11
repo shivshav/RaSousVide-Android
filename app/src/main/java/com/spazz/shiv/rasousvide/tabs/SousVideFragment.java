@@ -116,10 +116,10 @@ public class SousVideFragment extends Fragment {
 
     }
 
-    @OnItemSelected(R.id.meal_spinner)
+    @OnItemSelected(value = R.id.meal_spinner, callback = OnItemSelected.Callback.ITEM_SELECTED)
     void mealSelected(int position) {
         Meal[] m = entrees.get(position).getMeals();
-        if(m[0].getMealType() != null) {
+        if(m != null && m[0].getMealType() != null) {
             mealSubChoice.setVisibility(View.VISIBLE);
             List<String> mealTypes = new ArrayList<>(m.length);
             for (Meal meal : m) {

@@ -4,6 +4,8 @@ import android.text.format.Time;
 
 import com.orm.SugarRecord;
 
+import java.util.List;
+
 /**
  * Created by Shivneil on 2/10/2015.
  * TODO: Add legal stuff
@@ -11,10 +13,9 @@ import com.orm.SugarRecord;
  */
 public class Entree extends SugarRecord<Entree> {
 
+    //TODO:Figure out the structure of this when i get back to it
     private final static Entree INITIAL_DATA[] = {
-        new Entree("Chicken",new Meal[] {
-            new Meal(null, 146.0)
-        }),
+        new Entree("Chicken"),
         new Entree("Steak", new Meal[] {
             new Meal("Medium-Rare", 134.0),
             new Meal("Medium", 140.0),
@@ -26,21 +27,25 @@ public class Entree extends SugarRecord<Entree> {
         })
 
     };
+    private final static Meal INITIAL_MEALS[] = {
+            new Meal(null, 146.0),
 
+    }
 
-    private String entreeName;
-    private Meal[] meals;//All entrees should have AT LEAST ONE related meal
+    private String entreeName;//All entrees should have AT LEAST ONE related meal
     // Entree -> Meal = 1 -> Many relationship
 
-    public Entree(String name, Meal[] meals) {
+    public Entree(String name) {
         this.entreeName = name;
-        this.meals = meals;
     }
 
     //This stays here for compatibility with SugarORM
     public Entree() {
-        this(null, null);
+
     }
+//    public Entree() {
+//        this(null, null);
+//    }
 
     public String getEntreeName() {
         return entreeName;
@@ -50,14 +55,9 @@ public class Entree extends SugarRecord<Entree> {
         this.entreeName = entreeName;
     }
 
-    public Meal[] getMeals() {
-        return meals;
+    public List<Meal> getMeals() {
+        return Meal.find(Meal.class, "entree = ?", this.getId().toString());
     }
-
-    public void setMeals(Meal[] meals) {
-        this.meals = meals;
-    }
-
     public static void firstTimeMealSetup() {
         for(int i = 0; i < Entree.INITIAL_DATA.length; i++) {
             Meal[] tmp = Entree.INITIAL_DATA[i].getMeals();
