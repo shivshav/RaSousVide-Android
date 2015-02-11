@@ -1,9 +1,8 @@
 package com.spazz.shiv.rasousvide.database;
 
-import com.orm.SugarRecord;
+import android.text.format.Time;
 
-import java.util.DuplicateFormatFlagsException;
-import java.util.List;
+import com.orm.SugarRecord;
 
 /**
  * Created by Shivneil on 2/9/2015.
@@ -12,101 +11,80 @@ import java.util.List;
  */
 public class Meal extends SugarRecord<Meal> {
 
-    private static final Meal INITIAL_DATA[] = {
-        new Meal("Chicken", 146.0),
-        new Meal("Steak", "Medium-Rare", 134.0),
-        new Meal("Eggs", "Hard-Boiled", 150.0)
-    };
-
-    String name;//This is the entree's name
-    String subType;//This is the meal subtype (can be NULL)
-    Double setPoint;//in Celsius (NOT NULL)
-    Double cookTime;
-    Double kParam;//This is the ideal K Parameter for this meal (can be NULL)
-    Double dParam;//This is the ideal D Parameter for this meal (can be NULL)
-    Double iParam;//This is the ideal I Parameter for this meal (can be NULL)
+    String mealType;//This is the meal type (if NULL, then there's only one)
+    double setPoint;//in Celsius (NOT NULL)
+    long cookTime;
+    double kParam;//This is the ideal K Parameter for this meal (can be NULL)
+    double dParam;//This is the ideal D Parameter for this meal (can be NULL)
+    double iParam;//This is the ideal I Parameter for this meal (can be NULL)
 
     public Meal() {
 
     }
 
-    public Meal(String name, String subType, Double setPoint, Double kParam, Double dParam, Double iParam) {
-        this.name = name;
-        this.subType = subType;
-        this.setPoint = setPoint;
-        this.kParam = kParam;
-        this.iParam = iParam;
-        this.dParam = dParam;
+    public Meal(String mealType, Double setPoint, Long cookTime, Double kParam, Double dParam, Double iParam) {
+        this.mealType = mealType;
+        this.setPoint = (setPoint == null? -1: setPoint);
+        this.cookTime = (cookTime == null? (long)Time.HOUR: cookTime);
+        this.kParam = (kParam == null? 44: kParam);
+        this.iParam = (iParam == null? 165: iParam);
+        this.dParam = (dParam == null? 4: dParam);
     }
 
-    public Meal(String name, Double setPoint) {
-        this(name, null, setPoint, null, null, null);
+    public Meal(String name, double setPoint) {
+        this(name, setPoint, null, null, null, null);
     }
 
-    public Meal(String name, String subType, Double setPoint) {
-        this(name, subType, setPoint, null, null, null);
+    public Meal(String mealType, double setPoint, long cookTime) {
+        this(mealType, setPoint, cookTime, null, null, null);
     }
 
-    public String getName() {
-        return name;
+    public String getMealType() {
+        return mealType;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setMealType(String mealType) {
+        this.mealType = mealType;
     }
 
-    public String getSubType() {
-        return subType;
-    }
-
-    public void setSubType(String subType) {
-        this.subType = subType;
-    }
-
-    public Double getSetPoint() {
+    public double getSetPoint() {
         return setPoint;
     }
 
-    public void setSetPoint(Double setPoint) {
+    public void setSetPoint(double setPoint) {
         this.setPoint = setPoint;
     }
 
-    public Double getCookTime() {
+    public long getCookTime() {
         return cookTime;
     }
 
-    public void setCookTime(Double cookTime) {
+    public void setCookTime(long cookTime) {
         this.cookTime = cookTime;
     }
 
-    public Double getkParam() {
+    public double getkParam() {
         return kParam;
     }
 
-    public void setkParam(Double kParam) {
+    public void setkParam(double kParam) {
         this.kParam = kParam;
     }
 
-    public Double getdParam() {
+    public double getdParam() {
         return dParam;
     }
 
-    public void setdParam(Double dParam) {
+    public void setdParam(double dParam) {
         this.dParam = dParam;
     }
 
-    public Double getiParam() {
+    public double getiParam() {
         return iParam;
     }
 
-    public void setiParam(Double iParam) {
+    public void setiParam(double iParam) {
         this.iParam = iParam;
-    }
-
-    public static void firstTimeMealSetup() {
-        for(int i = 0; i < Meal.INITIAL_DATA.length; i++) {
-            Meal.INITIAL_DATA[i].save();
-        }
     }
 
 }

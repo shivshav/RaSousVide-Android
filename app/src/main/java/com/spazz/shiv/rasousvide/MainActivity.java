@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
@@ -78,7 +79,7 @@ public class MainActivity extends ActionBarActivity {
 
         if(isFirstTime()) {
             //Execute database setup here
-            Meal.firstTimeMealSetup();
+            Entree.firstTimeMealSetup();
         }
     }
 
