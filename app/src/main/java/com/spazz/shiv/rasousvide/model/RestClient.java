@@ -12,7 +12,7 @@ import retrofit.client.OkClient;
 public class RestClient {
 
   private static ShivVideAPI REST_CLIENT;
-  private static String API_CALL = "25.48.16.20:5000";
+  private static String API_CALL = "http://25.48.16.20:5000";
 
   static {
     setupRestClient();

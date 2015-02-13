@@ -3,6 +3,7 @@ package com.spazz.shiv.rasousvide;
 import android.graphics.Outline;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -51,6 +52,21 @@ public class MainActivity extends ActionBarActivity {
 
     private TabsPagerAdapter mAdapter;
 
+    // Handler and Thread to query pi at interval
+    private Boolean inApp = false;
+    private Boolean mQuerying = false;
+    final int INTERVAL = 10000;
+    final Handler mHandler = new Handler();
+    final Runnable mPiQueryAtInterval = new Runnable(){
+        public void run() {
+            if (inApp && !mQuerying) {
+                querySousVide();
+            }
+            mHandler.postDelayed(this, INTERVAL);
+        }
+
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,13 +86,29 @@ public class MainActivity extends ActionBarActivity {
 //        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
         setupStopAnimation();
-        querySousVide();
+        // start interval querying of Pi
+        mPiQueryAtInterval.run();
+    }
+
+    @Override
+    protected void onPause() {
+        mHandler.removeCallbacks(mPiQueryAtInterval);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
+        super.onResume();
     }
 
     private void querySousVide() {
+        mQuerying = true;
+
         RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
             @Override
             public void success(ShivVideResponse svResponse, Response response) {
+                mQuerying = false;
                 // do cool shit
                 currModeTV.setText(svResponse.getMode());
                 currTempTV.setText(svResponse.getTemp());
@@ -84,6 +116,7 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void failure(RetrofitError error) {
+                mQuerying = false;
                 // do sad stuff
                 // set defaults for when there is no internet
                 if (error.getKind() == RetrofitError.Kind.NETWORK) {
@@ -93,7 +126,7 @@ public class MainActivity extends ActionBarActivity {
                     Log.i(TAG, "Check dis error: " + error);
                 }
                 currModeTV.setText("Disconnected");
-                currTempTV.setText("Nein");
+                currTempTV.setText("Room Temp");
                 currTempUnitsTV.setText("");
 
             }
