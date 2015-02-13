@@ -2,6 +2,7 @@ package com.spazz.shiv.rasousvide;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Outline;
 import android.os.Build;
@@ -25,6 +26,7 @@ import android.widget.RelativeLayout;
 import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
+import com.spazz.shiv.rasousvide.prefs.SettingsActivity;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
 import java.util.Iterator;
@@ -170,6 +172,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
             return true;
         }
 
