@@ -1,21 +1,30 @@
 package com.spazz.shiv.rasousvide.tabs;
 
 import android.app.Activity;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.spazz.shiv.rasousvide.R;
+import com.spazz.shiv.rasousvide.database.Entree;
+import com.spazz.shiv.rasousvide.database.Meal;
 import com.triggertrap.seekarc.SeekArc;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnItemSelected;
 
 
 /**
@@ -27,6 +36,7 @@ import butterknife.InjectView;
  * create an instance of this fragment.
  */
 public class SousVideFragment extends Fragment {
+    private static final String TAG = "SousVideFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
@@ -35,7 +45,15 @@ public class SousVideFragment extends Fragment {
     SeekArc seekArcTemp;
     @InjectView(R.id.seekTempText)
     TextView seekTempText;
+    @InjectView(R.id.meal_spinner)
+    Spinner mealSpinner;
+    @InjectView(R.id.meal_spinner_sub_choice)
+    Spinner mealSubChoice;
     // TODO: Rename and change types of parameters
+
+    List<Entree> entrees;
+
+    Meal selectedMeal;
     private int position;
 
 //    private OnFragmentInteractionListener mListener;
@@ -77,7 +95,14 @@ public class SousVideFragment extends Fragment {
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
         seekArcTemp.setProgress(0);
         //seekTempText.setText("Placeholder son!");
+        setupMealSpinner();
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -86,6 +111,52 @@ public class SousVideFragment extends Fragment {
 //            mListener.onFragmentInteraction(uri);
 //        }
     }
+
+    private void setupMealSpinner() {
+        entrees = Entree.listAll(Entree.class);
+        List<String> entreeNames = new ArrayList<>(entrees.size());
+
+        for(Entree e: entrees) {
+            entreeNames.add(e.getEntreeName());
+        }
+
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.spinner_item, entreeNames); //selected item will look like a spinner set from XML
+        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        mealSpinner.setAdapter(spinnerArrayAdapter);
+        mealSpinner.setSelection(0);
+
+    }
+
+    @OnItemSelected(value = R.id.meal_spinner, callback = OnItemSelected.Callback.ITEM_SELECTED)
+    void entreeSelected(int position) {
+        List<Meal> meals = entrees.get(position).getMeals();
+        if(meals != null && meals.get(0).getMealType() != null) {
+            mealSubChoice.setVisibility(View.VISIBLE);
+            List<String> mealTypes = new ArrayList<>(meals.size());
+            for (Meal meal : meals) {
+                mealTypes.add(meal.getMealType());
+            }
+            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.spinner_item, mealTypes); //selected item will look like a spinner set from XML
+            spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+            mealSubChoice.setAdapter(spinnerArrayAdapter);
+        }
+        else {
+            mealSubChoice.setVisibility(View.GONE);
+            mealSubChoice.setSelection(0);
+            mealSubChoice.setAdapter(null);
+            if(meals != null) {
+                selectedMeal = meals.get(0);
+                Log.d(TAG, "Selected meal has no name with setpoint " + meals.get(0).getSetPoint());
+            }
+        }
+    }
+
+    @OnItemSelected(value = R.id.meal_spinner_sub_choice, callback = OnItemSelected.Callback.ITEM_SELECTED)
+    void mealSelected(int position) {
+        selectedMeal = entrees.get(mealSpinner.getSelectedItemPosition()).getMeals().get(position);
+        Log.d(TAG, "Selected Meal is " + selectedMeal.getMealType());
+    }
+
 
     @Override
     public void onAttach(Activity activity) {

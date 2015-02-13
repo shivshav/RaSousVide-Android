@@ -95,6 +95,7 @@
                 android:id="@+id/meal_spinner"
                 android:layout_below="@id/meal_heading"
                 android:layout_centerHorizontal="true"
+                android:padding="8dp"
                 android:gravity="center_horizontal"/>
             <Spinner
                 android:layout_width="match_parent"
@@ -102,6 +103,7 @@
                 android:id="@+id/meal_spinner_sub_choice"
                 android:layout_below="@id/meal_spinner"
                 android:layout_centerHorizontal="true"
+                android:padding="8dp"
                 android:gravity="center_horizontal"
                 android:visibility="gone"
                 tools:visibility="visible"/>
