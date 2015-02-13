@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- From: file:/C:/Users/Shivneil/AndroidStudioProjects/RaSousVide/seekarc/build/intermediates/bundles/debug/res/values/values.xml -->
+    <!-- From: file:/home/pula/workspace/RaSousVide-Android/seekarc/build/intermediates/bundles/debug/res/values/values.xml -->
     <eat-comment/>
     <color name="progress_gray">#FFD8D8D8</color>
     <color name="progress_gray_dark">#FF383838</color>

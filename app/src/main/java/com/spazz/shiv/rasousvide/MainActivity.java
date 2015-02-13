@@ -1,55 +1,71 @@
 package com.spazz.shiv.rasousvide;
 
-import android.annotation.TargetApi;
 import android.graphics.Outline;
 import android.os.Build;
-import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.model.RestClient;
+import com.spazz.shiv.rasousvide.model.ShivVideResponse;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends ActionBarActivity {
 
-    @InjectView(R.id.toolbar)
-    Toolbar toolbar;
-    @InjectView(R.id.tabs)
-    PagerSlidingTabStrip tabs;
-    @InjectView(R.id.pager)
-    ViewPager pager;
+    private static final String TAG = "MAIN ACTIVITY";
+    @InjectView(R.id.toolbar) Toolbar toolbar;
+    @InjectView(R.id.tabs) PagerSlidingTabStrip tabs;
+    @InjectView(R.id.pager) ViewPager pager;
+    @InjectView(R.id.toolbar_bottom) Toolbar bottomToolbar;
+    @InjectView(R.id.current_mode) TextView currModeTV;
+    @InjectView(R.id.current_temp) TextView currTempTV;
+    @InjectView(R.id.current_temp_units) TextView currTempUnitsTV;
 
-    @InjectView(R.id.toolbar_bottom)
-    Toolbar bottomToolbar;
-//    @InjectView(R.id.bottom_layout)
-//    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
-    @InjectView(R.id.stop_button)
-    ImageButton stopButton;
-
-    @InjectView(R.id.send_button)
-    ImageButton sendButton;
+    @InjectView(R.id.stop_button) ImageButton stopButton;
+    @InjectView(R.id.send_button) ImageButton sendButton;
 
     private TabsPagerAdapter mAdapter;
+
+    // Handler and Thread to query pi at interval
+    private Boolean inApp = false;
+    private Boolean mQuerying = false;
+    final int INTERVAL = 10000;
+    final Handler mHandler = new Handler();
+    final Runnable mPiQueryAtInterval = new Runnable(){
+        public void run() {
+            if (inApp && !mQuerying) {
+                querySousVide();
+            }
+            mHandler.postDelayed(this, INTERVAL);
+        }
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +86,51 @@ public class MainActivity extends ActionBarActivity {
 //        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
         setupStopAnimation();
+        // start interval querying of Pi
+        mPiQueryAtInterval.run();
+    }
+
+    @Override
+    protected void onPause() {
+        mHandler.removeCallbacks(mPiQueryAtInterval);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
+        super.onResume();
+    }
+
+    private void querySousVide() {
+        mQuerying = true;
+
+        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
+            @Override
+            public void success(ShivVideResponse svResponse, Response response) {
+                mQuerying = false;
+                // do cool shit
+                currModeTV.setText(svResponse.getMode());
+                currTempTV.setText(svResponse.getTemp());
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                mQuerying = false;
+                // do sad stuff
+                // set defaults for when there is no internet
+                if (error.getKind() == RetrofitError.Kind.NETWORK) {
+                    Log.i(TAG, "No Internet Connection: " + error);
+                } else {
+                    // something went wrong
+                    Log.i(TAG, "Check dis error: " + error);
+                }
+                currModeTV.setText("Disconnected");
+                currTempTV.setText("Room Temp");
+                currTempUnitsTV.setText("");
+
+            }
+        });
     }
 
     private void setupStopAnimation(){

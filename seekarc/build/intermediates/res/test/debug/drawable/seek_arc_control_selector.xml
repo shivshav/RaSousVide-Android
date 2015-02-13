@@ -29,4 +29,4 @@
     <item android:drawable="@drawable/scrubber_control_normal_holo"/>
 
 </selector>
-<!-- From: file:/C:/Users/Shivneil/AndroidStudioProjects/RaSousVide/seekarc/src/main/res/drawable/seek_arc_control_selector.xml --><!-- From: file:/C:/Users/Shivneil/AndroidStudioProjects/RaSousVide/seekarc/build/intermediates/bundles/debug/res/drawable/seek_arc_control_selector.xml -->
+<!-- From: file:/home/pula/workspace/RaSousVide-Android/seekarc/src/main/res/drawable/seek_arc_control_selector.xml --><!-- From: file:/home/pula/workspace/RaSousVide-Android/seekarc/build/intermediates/bundles/debug/res/drawable/seek_arc_control_selector.xml -->
