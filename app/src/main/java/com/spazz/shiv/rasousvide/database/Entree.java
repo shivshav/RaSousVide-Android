@@ -14,23 +14,21 @@ import java.util.List;
 public class Entree extends SugarRecord<Entree> {
 
     //TODO:Figure out the structure of this when i get back to it
-    private final static Entree INITIAL_DATA[] = {
+    private final static Entree INITIAL_ENTREES[] = {
         new Entree("Chicken"),
-        new Entree("Steak", new Meal[] {
-            new Meal("Medium-Rare", 134.0),
-            new Meal("Medium", 140.0),
-            new Meal("Medium-Well", 150.0)
-        }),
-        new Entree("Eggs", new Meal[] {
-            new Meal("Soft Cooked", 146, (long)(Time.HOUR*.75)),
-            new Meal("Hard Cooked", 160, (long)(Time.HOUR*.75))
-        })
+        new Entree("Steak"),
+        new Entree("Eggs")
 
     };
     private final static Meal INITIAL_MEALS[] = {
-            new Meal(null, 146.0),
+        new Meal(INITIAL_ENTREES[0], null, 146.0),
+        new Meal(INITIAL_ENTREES[1], "Medium-Rare", 134.0),
+        new Meal(INITIAL_ENTREES[1], "Medium", 140.0),
+        new Meal(INITIAL_ENTREES[1], "Medium-Well", 150.0),
+        new Meal(INITIAL_ENTREES[2], "Soft Cooked", 146, (long)(Time.HOUR*.75)),
+        new Meal(INITIAL_ENTREES[2], "Hard Cooked", 160, (long)(Time.HOUR*.75))
 
-    }
+    };
 
     private String entreeName;//All entrees should have AT LEAST ONE related meal
     // Entree -> Meal = 1 -> Many relationship
@@ -59,12 +57,11 @@ public class Entree extends SugarRecord<Entree> {
         return Meal.find(Meal.class, "entree = ?", this.getId().toString());
     }
     public static void firstTimeMealSetup() {
-        for(int i = 0; i < Entree.INITIAL_DATA.length; i++) {
-            Meal[] tmp = Entree.INITIAL_DATA[i].getMeals();
-            for(int j = 0; j < tmp.length; j++) {
-                tmp[j].save();
-            }
-            INITIAL_DATA[i].save();
+        for (int i = 0; i < INITIAL_ENTREES.length; i++) {
+            INITIAL_ENTREES[i].save();
+        }
+        for(int i = 0; i < Entree.INITIAL_MEALS.length; i++) {
+            INITIAL_MEALS[i].save();
         }
     }
 }
