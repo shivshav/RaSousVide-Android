@@ -25,8 +25,8 @@ public class Entree extends SugarRecord<Entree> {
         new Meal(INITIAL_ENTREES[1], "Medium-Rare", 134.0),
         new Meal(INITIAL_ENTREES[1], "Medium", 140.0),
         new Meal(INITIAL_ENTREES[1], "Medium-Well", 150.0),
-        new Meal(INITIAL_ENTREES[2], "Soft Cooked", 146, (long)(Time.HOUR*.75)),
-        new Meal(INITIAL_ENTREES[2], "Hard Cooked", 160, (long)(Time.HOUR*.75))
+        new Meal(INITIAL_ENTREES[2], "Soft Cooked", 146, (long)(Meal.HOUR*.75)),
+        new Meal(INITIAL_ENTREES[2], "Hard Cooked", 160, (long)(Meal.HOUR*.75))
 
     };
 

@@ -53,6 +53,7 @@ public class SousVideFragment extends Fragment {
 
     List<Entree> entrees;
 
+    Meal selectedMeal;
     private int position;
 
 //    private OnFragmentInteractionListener mListener;
@@ -98,6 +99,12 @@ public class SousVideFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.reset(this);
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
 //        if (mListener != null) {
@@ -113,35 +120,42 @@ public class SousVideFragment extends Fragment {
             entreeNames.add(e.getEntreeName());
         }
 
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), android.R.layout.simple_spinner_item, entreeNames); //selected item will look like a spinner set from XML
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.spinner_item, entreeNames); //selected item will look like a spinner set from XML
+        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         mealSpinner.setAdapter(spinnerArrayAdapter);
         mealSpinner.setSelection(0);
 
     }
 
     @OnItemSelected(value = R.id.meal_spinner, callback = OnItemSelected.Callback.ITEM_SELECTED)
-    void mealSelected(int position) {
+    void entreeSelected(int position) {
         List<Meal> meals = entrees.get(position).getMeals();
         if(meals != null && meals.get(0).getMealType() != null) {
             mealSubChoice.setVisibility(View.VISIBLE);
-            Log.d(TAG, "Subcoice should be visible now");
             List<String> mealTypes = new ArrayList<>(meals.size());
             for (Meal meal : meals) {
                 mealTypes.add(meal.getMealType());
             }
-            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_spinner_item, mealTypes); //selected item will look like a spinner set from XML
-            spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.spinner_item, mealTypes); //selected item will look like a spinner set from XML
+            spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
             mealSubChoice.setAdapter(spinnerArrayAdapter);
-            mealSubChoice.setSelection(0);
-
         }
         else {
             mealSubChoice.setVisibility(View.GONE);
+            mealSubChoice.setSelection(0);
             mealSubChoice.setAdapter(null);
+            if(meals != null) {
+                selectedMeal = meals.get(0);
+                Log.d(TAG, "Selected meal has no name with setpoint " + meals.get(0).getSetPoint());
+            }
         }
     }
 
+    @OnItemSelected(value = R.id.meal_spinner_sub_choice, callback = OnItemSelected.Callback.ITEM_SELECTED)
+    void mealSelected(int position) {
+        selectedMeal = entrees.get(mealSpinner.getSelectedItemPosition()).getMeals().get(position);
+        Log.d(TAG, "Selected Meal is " + selectedMeal.getMealType());
+    }
 
 
     @Override

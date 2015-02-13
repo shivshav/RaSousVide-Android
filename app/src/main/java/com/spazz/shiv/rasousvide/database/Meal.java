@@ -10,6 +10,7 @@ import com.orm.SugarRecord;
  * TODO: Add javadocs stuff
  */
 public class Meal extends SugarRecord<Meal> {
+    public static final long HOUR = 60*60*1;
 
     Entree entree;
     String mealType;//This is the meal type (if NULL, then there's only one)
@@ -27,7 +28,7 @@ public class Meal extends SugarRecord<Meal> {
         this.entree = entree;
         this.mealType = mealType;
         this.setPoint = (setPoint == null? -1: setPoint);
-        this.cookTime = (cookTime == null? (long)Time.HOUR: cookTime);
+        this.cookTime = (cookTime == null? HOUR: cookTime);
         this.kParam = (kParam == null? 44: kParam);
         this.iParam = (iParam == null? 165: iParam);
         this.dParam = (dParam == null? 4: dParam);
