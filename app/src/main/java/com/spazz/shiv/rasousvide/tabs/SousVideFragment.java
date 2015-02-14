@@ -1,8 +1,11 @@
 package com.spazz.shiv.rasousvide.tabs;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.media.audiofx.BassBoost;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
@@ -10,12 +13,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
+import com.spazz.shiv.rasousvide.prefs.SettingsActivity;
 import com.triggertrap.seekarc.SeekArc;
 
 import java.util.ArrayList;
@@ -49,12 +54,16 @@ public class SousVideFragment extends Fragment {
     Spinner mealSpinner;
     @InjectView(R.id.meal_spinner_sub_choice)
     Spinner mealSubChoice;
+    @InjectView(R.id.pid_layout)
+    RelativeLayout pidLayout;
     // TODO: Rename and change types of parameters
 
     List<Entree> entrees;
 
     Meal selectedMeal;
-    private int position;
+
+    SharedPreferences prefs;
+    public boolean advView;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -81,9 +90,7 @@ public class SousVideFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            position = getArguments().getInt(ARG_POSITION);
-        }
+        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
 
     @Override
@@ -96,9 +103,23 @@ public class SousVideFragment extends Fragment {
         seekArcTemp.setProgress(0);
         //seekTempText.setText("Placeholder son!");
         setupMealSpinner();
+        advView = prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false);
+
         return rootView;
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        boolean pref = prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false);
+        if(advView != pref) {
+            if (pref) {
+                pidLayout.setVisibility(View.VISIBLE);
+            } else {
+                pidLayout.setVisibility(View.GONE);
+            }
+            advView = pref;
+        }
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

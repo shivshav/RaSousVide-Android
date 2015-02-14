@@ -2,6 +2,7 @@ package com.spazz.shiv.rasousvide.prefs;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -16,6 +17,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.spazz.shiv.rasousvide.R;
 
@@ -32,7 +34,8 @@ import java.util.List;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends PreferenceActivity  {
+    private static final String TAG = "SettingsAActivity";
     /**
      * Determines whether to always show the simplified settings UI, where
      * settings are presented in a single list. When false, settings are shown
@@ -41,6 +44,19 @@ public class SettingsActivity extends PreferenceActivity {
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
 
+    public static final String KEY_PREF_ADV_VIEW = "advanced_switch";
+    public static final String KEY_PREF_PI_IP = "pi_ip";
+    public static final String KEY_PREF_PI_PORT = "pi_port";
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -63,12 +79,12 @@ public class SettingsActivity extends PreferenceActivity {
         // use the older PreferenceActivity APIs.
 
         // Add 'general' preferences.
-//        addPreferencesFromResource(R.xml.pref_general);
+        addPreferencesFromResource(R.xml.pref_general);
 
         //Add Raspberry Pi preferences
         PreferenceCategory fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_pi);
-//        getPreferenceScreen().addPreference(fakeHeader);
+        getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_pi_settings);
 
 //        // Add 'notifications' preferences, and a corresponding header.
@@ -88,8 +104,9 @@ public class SettingsActivity extends PreferenceActivity {
         // to reflect the new value, per the Android Design guidelines.
 //        bindPreferenceSummaryToValue(findPreference("example_text"));
 
-        bindPreferenceSummaryToValue(findPreference("pi_ip"));
-        bindPreferenceSummaryToValue(findPreference("pi_port"));
+//        bindPreferenceSummaryToValue(findPreference(KEY_PREF_ADV_VIEW));
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_IP));
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_PORT));
 
 
 //        bindPreferenceSummaryToValue(findPreference("example_list"));
@@ -210,6 +227,8 @@ public class SettingsActivity extends PreferenceActivity {
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
     }
+
+
 
     /**
      * This fragment shows general preferences only. It is used when the

@@ -12,9 +12,11 @@
         <item>F</item>
         <item>C</item>
     </string-array>
-    <string-array name="sliding_tab_names">
+    <string-array name="sliding_tab_basic_names">
         <item>Sous Vide</item>
         <item>Crock Pot</item>
+    </string-array>
+    <string-array name="sliding_tab_advanced_names">
         <item>Manual</item>
     </string-array>
     <string name="title_activity_main">MainActivity</string>
