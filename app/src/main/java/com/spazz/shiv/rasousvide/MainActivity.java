@@ -1,6 +1,7 @@
 package com.spazz.shiv.rasousvide;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.graphics.Outline;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,10 +20,12 @@ import android.view.ViewOutlineProvider;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.model.CookingNotificationService;
 import com.spazz.shiv.rasousvide.model.RestClient;
 import com.spazz.shiv.rasousvide.model.ShivVideResponse;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
@@ -67,6 +70,9 @@ public class MainActivity extends ActionBarActivity {
         }
 
     };
+
+    //TODO remove this debugging var
+    private Boolean serviceRunning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +157,18 @@ public class MainActivity extends ActionBarActivity {
 //        });
     }
 
-    @OnClick(R.id.stop_button)
+    @OnClick(R.id.send_button) @SuppressWarnings("unused")
+    public void sendButtonClick(View v) {
+        Intent cooking = new Intent(this, CookingNotificationService.class);
+       if(!serviceRunning) {
+           startService(cooking);
+           serviceRunning = true;
+       } else {
+           stopService(cooking);
+           serviceRunning = false;
+       }
+    }
+    @OnClick(R.id.stop_button) @SuppressWarnings("unused")
     public void stopClicked(View view) {
         view.clearAnimation();
     }
