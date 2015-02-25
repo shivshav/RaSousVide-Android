@@ -1,5 +1,6 @@
 package com.spazz.shiv.rasousvide;
 
+import android.annotation.TargetApi;
 import android.graphics.Outline;
 import android.os.Build;
 import android.os.Bundle;
@@ -154,8 +155,9 @@ public class MainActivity extends ActionBarActivity {
     public void stopClicked(View view) {
         view.clearAnimation();
     }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setupBottomToolbar() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
                 @Override
                 public void getOutline(View view, Outline outline) {
@@ -165,7 +167,6 @@ public class MainActivity extends ActionBarActivity {
                 }
             };
             sendButton.setOutlineProvider(viewOutlineProvider);
-        }
     }
 
     @Override
