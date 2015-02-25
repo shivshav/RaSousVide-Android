@@ -21,12 +21,18 @@ public class CookingNotificationService extends Service {
      * responsibility to stop the service when its work is done, by calling stopSelf() or
      * topService(). (If you only want to provide binding, you don't need to implement this method.)
      *
-     * @return creates method to have permanent notification
+     * Three options for priorities:
+     * @Int START_NOT_STICKY do not recreate the service; app can simply restart unfinished jobs
+     * @Int START_STICKY recreate service and call onStartCommand(); used in media player apps
+     * @Int START_REDELIVER_INTENT recreate service and continue with last intent; downloading files
+     *
+     * @return creates method to have permanent notification; doesn't need to continue since we
+     *          repoll every 5 minutes anyways
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        return START_STICKY;
+        Toast.makeText(this, "onStartCommand()", Toast.LENGTH_SHORT).show();
+        return START_NOT_STICKY;
     }
 
     /**
@@ -48,6 +54,6 @@ public class CookingNotificationService extends Service {
      */
     @Override
     public void onDestroy() {
-
+        Toast.makeText(this, "DESTROY ALL SERVICE", Toast.LENGTH_SHORT).show();
     }
 }
