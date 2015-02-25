@@ -6,4 +6,4 @@
 /build
 Thumbs.db
 /seekarc/build/
-.iml
+*.iml
