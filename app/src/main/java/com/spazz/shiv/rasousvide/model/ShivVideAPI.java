@@ -13,5 +13,5 @@ public interface ShivVideAPI {
 
     @POST("postparams/1")
     //TODO: Add object with data to send to Pi
-    void postDeliciousParams();
+    void postDeliciousParams(ShivVidePost post);
 }
