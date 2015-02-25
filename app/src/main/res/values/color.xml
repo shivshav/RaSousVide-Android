@@ -10,7 +10,7 @@
     <color name="DebugRed">#FF0000</color>
     <color name="DebugGreen">#00FF00</color>
 
-    <color name="color_primary">@color/light_blue_500</color>
+    <color name="color_primary">@color/light_blue_700</color>
     <color name="color_primary_dark">@color/light_blue_700</color>
     <color name="color_accent">@color/yellow_a200</color>
 </resources>
