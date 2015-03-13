@@ -1,5 +1,8 @@
 package com.spazz.shiv.rasousvide;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,6 +14,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +22,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -36,6 +41,8 @@ import butterknife.OnClick;
 
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = "MainActivity";
+
 
     @InjectView(R.id.toolbar)
     Toolbar toolbar;
@@ -56,9 +63,16 @@ public class MainActivity extends ActionBarActivity {
     @InjectView(R.id.send_button)
     ImageButton sendButton;
 
+    @InjectView(R.id.menu_button)
+    ImageButton menuButton;
+
     private TabsPagerAdapter mAdapter;
 
     private Boolean firstTime = null;
+
+    private boolean menuOpen;
+    private float sendPos;
+    private float stopPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,10 +150,101 @@ public class MainActivity extends ActionBarActivity {
 //        });
     }
 
+    private void initMenu() {
+
+        sendPos = menuButton.getBottom() - sendButton.getBottom();
+        stopPos = menuButton.getBottom() - stopButton.getBottom();
+
+        sendButton.setTranslationY(sendPos);
+        sendButton.setVisibility(View.GONE);
+
+        stopButton.setTranslationY(stopPos);
+        stopButton.setVisibility(View.GONE);
+
+        menuOpen = false;
+
+    }
+
+    @OnClick(R.id.menu_button)
+    public void menuClicked(View view) {
+
+        ObjectAnimator sendAnim = ObjectAnimator.ofFloat(sendButton, "translationY", 0);
+        ObjectAnimator stopAnim = ObjectAnimator.ofFloat(stopButton, "translationY", 0);
+
+        float sendTranslation;
+        float stopTranslation;
+
+        if(menuOpen) {//do close animation
+
+            sendTranslation = sendPos;
+            stopTranslation = stopPos;
+
+            //make buttons non existant for layout calculation & view purposes
+            sendAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    sendButton.setVisibility(View.GONE);
+                }
+            });
+
+            stopAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    stopButton.setVisibility(View.GONE);
+                }
+            });
+
+
+
+        }
+        else {//do open animation
+
+            //Items will be set to their desired position
+            sendTranslation = 0;
+            stopTranslation = 0;
+
+            //make buttons visible
+            sendAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    sendButton.setVisibility(View.VISIBLE);
+                }
+            });
+            stopAnim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    stopButton.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+
+        sendAnim.setFloatValues(sendTranslation);
+        sendAnim.setDuration(500);
+        sendAnim.setInterpolator(new DecelerateInterpolator());
+        sendAnim.start();
+
+        stopAnim.setFloatValues(stopTranslation);
+        stopAnim.setDuration(500);
+        stopAnim.setInterpolator(new DecelerateInterpolator());
+        stopAnim.start();
+//        sendButton.setTranslationY(sendPos);
+
+//        stopButton.setTranslationY(stopTranslation);
+
+        Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos);
+
+        menuOpen = !menuOpen;
+    }
+
     @OnClick(R.id.stop_button)
     public void stopClicked(View view) {
         view.clearAnimation();
     }
+
     private void setupBottomToolbar() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
@@ -158,6 +263,7 @@ public class MainActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        initMenu();
         return true;
     }
 
