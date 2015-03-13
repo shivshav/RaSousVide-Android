@@ -2,6 +2,7 @@ package com.spazz.shiv.rasousvide;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
@@ -95,7 +97,7 @@ public class MainActivity extends ActionBarActivity {
 //                .getDisplayMetrics());
 //        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
-        setupStopAnimation();
+//        setupStopAnimation();
 
 //        if(isFirstTime()) {
 //            //Execute database setup here
@@ -167,20 +169,34 @@ public class MainActivity extends ActionBarActivity {
 
     @OnClick(R.id.menu_button)
     public void menuClicked(View view) {
+        long animDuration = 350;
 
-        ObjectAnimator sendAnim = ObjectAnimator.ofFloat(sendButton, "translationY", 0);
-        ObjectAnimator stopAnim = ObjectAnimator.ofFloat(stopButton, "translationY", 0);
+        ObjectAnimator sendAlpha = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
+        ObjectAnimator stopAlpha = ObjectAnimator.ofFloat(stopButton, "alpha", 0);
+        float alphaStart;
+        float alphaEnd;
 
+        ObjectAnimator sendTranslate = ObjectAnimator.ofFloat(sendButton, "translationY", 0);
+        ObjectAnimator stopTranslate = ObjectAnimator.ofFloat(stopButton, "translationY", 0);
         float sendTranslation;
         float stopTranslation;
 
+        ObjectAnimator menuRotate = ObjectAnimator.ofFloat(menuButton, "rotation", 0);
+        float rotateStart;
+        float rotateEnd;
+
         if(menuOpen) {//do close animation
+            alphaStart = 1;
+            alphaEnd = 0;
 
             sendTranslation = sendPos;
             stopTranslation = stopPos;
 
+            rotateStart = 45;
+            rotateEnd = 0;
+
             //make buttons non existant for layout calculation & view purposes
-            sendAnim.addListener(new AnimatorListenerAdapter() {
+            sendTranslate.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
@@ -188,7 +204,12 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
 
-            stopAnim.addListener(new AnimatorListenerAdapter() {
+            stopTranslate.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    stopButton.clearAnimation();
+                }
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
@@ -201,36 +222,60 @@ public class MainActivity extends ActionBarActivity {
         }
         else {//do open animation
 
+            alphaStart = 0;
+            alphaEnd = 1;
             //Items will be set to their desired position
             sendTranslation = 0;
             stopTranslation = 0;
 
+            rotateStart = 0;
+            rotateEnd = 45;
+
             //make buttons visible
-            sendAnim.addListener(new AnimatorListenerAdapter() {
+            sendTranslate.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
                     super.onAnimationStart(animation);
                     sendButton.setVisibility(View.VISIBLE);
                 }
             });
-            stopAnim.addListener(new AnimatorListenerAdapter() {
+            stopTranslate.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
                     super.onAnimationStart(animation);
                     stopButton.setVisibility(View.VISIBLE);
                 }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    setupStopAnimation();
+                }
             });
         }
 
-        sendAnim.setFloatValues(sendTranslation);
-        sendAnim.setDuration(500);
-        sendAnim.setInterpolator(new DecelerateInterpolator());
-        sendAnim.start();
+        sendAlpha.setFloatValues(alphaStart, alphaEnd);
+        sendAlpha.setDuration(animDuration);
 
-        stopAnim.setFloatValues(stopTranslation);
-        stopAnim.setDuration(500);
-        stopAnim.setInterpolator(new DecelerateInterpolator());
-        stopAnim.start();
+        stopAlpha.setFloatValues(alphaStart, alphaEnd);
+        stopAlpha.setDuration(animDuration);
+
+        sendTranslate.setFloatValues(sendTranslation);
+        sendTranslate.setDuration(animDuration);
+        sendTranslate.setInterpolator(new DecelerateInterpolator());
+
+        stopTranslate.setFloatValues(stopTranslation);
+        stopTranslate.setDuration(animDuration);
+        stopTranslate.setInterpolator(new DecelerateInterpolator());
+
+        menuRotate.setFloatValues(rotateStart, rotateEnd);
+        menuRotate.setDuration(animDuration);
+        menuRotate.setInterpolator(new BounceInterpolator());
+
+        AnimatorSet menuToggle = new AnimatorSet();
+
+        menuToggle.play(menuRotate).with(sendTranslate).with(sendAlpha).with(stopTranslate).with(stopAlpha);
+        menuToggle.start();
 //        sendButton.setTranslationY(sendPos);
 
 //        stopButton.setTranslationY(stopTranslation);
