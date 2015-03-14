@@ -39,6 +39,24 @@
         android:layout_above="@id/toolbar_bottom"
         tools:context="com.spazz.shiv.rasousvide.MainActivity" />
     <ImageButton
+        android:id="@+id/test_button"
+        android:layout_width="@dimen/round_button_diameter"
+        android:layout_height="@dimen/round_button_diameter"
+        android:layout_gravity="start"
+        android:layout_above="@id/toolbar_bottom"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="@dimen/add_button_margin"
+        android:layout_marginLeft="@dimen/add_button_margin"
+        android:tint="@color/color_accent"
+        android:stateListAnimator="@anim/button_ripple"
+        android:background="@drawable/oval_ripple"
+        android:elevation="@dimen/elevation_high"
+        android:src="@drawable/ic_expand_menu"
+        android:contentDescription="The button that causes the app to send a request to the raspberry pi"/>
+
+    <ImageButton
         android:id="@+id/menu_button"
         android:layout_width="@dimen/round_button_diameter"
         android:layout_height="@dimen/round_button_diameter"

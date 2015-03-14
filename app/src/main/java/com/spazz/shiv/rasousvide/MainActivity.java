@@ -15,12 +15,15 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewOutlineProvider;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
@@ -28,6 +31,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.database.Entree;
@@ -55,6 +60,9 @@ public class MainActivity extends ActionBarActivity {
 
     @InjectView(R.id.toolbar_bottom)
     Toolbar bottomToolbar;
+
+    @InjectView(R.id.current_mode)
+    TextView currentMode;
 //    @InjectView(R.id.bottom_layout)
 //    RelativeLayout bottomLayout;
 
@@ -67,6 +75,9 @@ public class MainActivity extends ActionBarActivity {
 
     @InjectView(R.id.menu_button)
     ImageButton menuButton;
+
+    @InjectView(R.id.test_button)
+    ImageButton testButton;
 
     private TabsPagerAdapter mAdapter;
 
@@ -104,6 +115,8 @@ public class MainActivity extends ActionBarActivity {
 //            Entree.firstTimeMealSetup();
 //        }
     }
+
+
 
     private void forceNewEntries() {
         List<Meal> mealList = Meal.listAll(Meal.class);
@@ -158,7 +171,9 @@ public class MainActivity extends ActionBarActivity {
         stopPos = menuButton.getBottom() - stopButton.getBottom();
 
         sendButton.setTranslationY(sendPos);
-        sendButton.setVisibility(View.GONE);
+//        sendButton.setVisibility(View.GONE);
+
+        menuButton.setAlpha(0.0f);
 
         stopButton.setTranslationY(stopPos);
         stopButton.setVisibility(View.GONE);
@@ -253,13 +268,14 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
         }
-
+        //TODO:Make alpha animations decelerate/accelerate?
         sendAlpha.setFloatValues(alphaStart, alphaEnd);
         sendAlpha.setDuration(animDuration);
 
         stopAlpha.setFloatValues(alphaStart, alphaEnd);
         stopAlpha.setDuration(animDuration);
 
+        //TODO: Make translations accelerate on close and decelerate on open?
         sendTranslate.setFloatValues(sendTranslation);
         sendTranslate.setDuration(animDuration);
         sendTranslate.setInterpolator(new DecelerateInterpolator());
@@ -290,6 +306,15 @@ public class MainActivity extends ActionBarActivity {
         view.clearAnimation();
     }
 
+    @OnClick(R.id.test_button)
+    public void testClicked(View view) {
+        if("Auto".matches(currentMode.getText().toString())) {
+            currentMode.setText("Off");
+        }
+        else if("Off".matches(currentMode.getText().toString())) {
+            currentMode.setText("Auto");
+        }
+    }
     private void setupBottomToolbar() {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
@@ -302,6 +327,245 @@ public class MainActivity extends ActionBarActivity {
             };
             sendButton.setOutlineProvider(viewOutlineProvider);
         }
+
+        currentMode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                altModeChanged(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
+    private void altModeChanged(String mode) {
+        long fullAnimDuration = 500;
+
+        ObjectAnimator menuFlip = ObjectAnimator.ofFloat(menuButton, "rotationY", 0);
+        ObjectAnimator menuAppear = ObjectAnimator.ofFloat(menuButton, "alpha", 0);
+        float menuAppearStart;
+        float menuAppearEnd;
+        float menuFlipStart;
+        float menuFlipEnd;
+
+        ObjectAnimator sendFlip = ObjectAnimator.ofFloat(sendButton, "rotationY", 0);
+        final ObjectAnimator sendAppear = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
+        float sendAppearStart;
+        float sendAppearEnd;
+        float sendFlipStart;
+        float sendFlipEnd;
+
+        boolean on;
+
+        if("Auto".matches(mode)) {//Sous Vide was turned on to sous vide mode
+            //flip send button to expandMenu button
+            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
+            on = true;
+
+//            menuButton.setAlpha(0);
+
+            menuAppearStart = 0;
+            menuAppearEnd = 1;
+
+            menuFlipStart = -180;
+            menuFlipEnd = 0;
+
+//            menuAppear.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    super.onAnimationEnd(animation);
+//                    menuButton.setVisibility(View.VISIBLE);
+//                }
+//            });
+
+            sendAppearStart = 1;
+            sendAppearEnd = 0;
+
+            sendAppear.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    sendButton.setVisibility(View.GONE);
+                    sendButton.setRotationY(0);
+
+                }
+            });
+
+            sendFlipStart = 0;
+            sendFlipEnd = 180;
+
+        }
+        else if("Off".matches(mode)) {//Sous Vide was turned off
+            //flip expandMenu to send
+            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
+            on = false;
+//            sendButton.setAlpha(0);
+            sendButton.setVisibility(View.VISIBLE);
+
+            menuAppearStart = 1;
+            menuAppearEnd = 0;
+
+            menuFlipStart = 0;
+            menuFlipEnd = -180;
+
+//            menuAppear.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    super.onAnimationEnd(animation);
+//                    sendButton.setVisibility(View.GONE);
+//                }
+//            });
+            sendAppearStart = 0;
+            sendAppearEnd = 1;
+
+            sendFlipStart = 180;
+            sendFlipEnd = 0;
+
+            sendAppear.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    sendButton.setVisibility(View.VISIBLE);
+                    sendButton.setRotationY(0);
+
+                }
+            });
+        }
+        else {
+            return;
+        }
+
+        menuFlip.setFloatValues(menuFlipStart, menuFlipEnd);
+        menuFlip.setDuration(fullAnimDuration);
+        menuFlip.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        menuAppear.setFloatValues(menuAppearStart, menuAppearEnd);
+        menuAppear.setDuration(1);
+        menuAppear.setStartDelay(fullAnimDuration/2);
+
+
+        sendFlip.setFloatValues(sendFlipStart, sendFlipEnd);
+        sendFlip.setDuration(fullAnimDuration);
+        sendFlip.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        sendAppear.setFloatValues(sendAppearStart, sendAppearEnd);
+        sendAppear.setDuration(1);
+        sendAppear.setStartDelay(fullAnimDuration/2);
+
+        AnimatorSet modeChange = new AnimatorSet();
+
+        if(on) {
+            modeChange.play(menuFlip).with(menuAppear).with(sendFlip).with(sendAppear);
+        }
+        else {
+            modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+
+        }
+        modeChange.start();
+        Log.d(TAG, "On:" + on + "FlipStart:" + menuFlipStart + ", FlipEnd:" + menuFlipEnd);
+
+    }
+    private void modeChanged(String mode) {
+        long fullAnimDuration = 500;
+
+        ObjectAnimator menuFlip = ObjectAnimator.ofFloat(menuButton, "rotationY", 0);
+        ObjectAnimator menuAppear = ObjectAnimator.ofFloat(menuButton, "alpha", 0);
+        float menuAppearStart;
+        float menuAppearEnd;
+        float menuFlipStart;
+        float menuFlipEnd;
+
+        ObjectAnimator sendFlip = ObjectAnimator.ofFloat(sendButton, "rotationY", 0);
+        ObjectAnimator sendAppear = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
+        float sendAppearStart;
+        float sendAppearEnd;
+        float sendFlipStart;
+        float sendFlipEnd;
+
+        boolean on;
+
+        if("Auto".matches(mode)) {//Sous Vide was turned on to sous vide mode
+            //flip send button to expandMenu button
+            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
+            on = true;
+
+            menuButton.setAlpha(0);
+
+            menuAppearStart = 0;
+            menuAppearEnd = 1;
+
+            menuFlipStart = -180;
+            menuFlipEnd = 0;
+
+            sendAppearStart = 1;
+            sendAppearEnd = 0;
+
+            sendFlipStart = 0;
+            sendFlipEnd = 180;
+
+        }
+        else if("Off".matches(mode)) {//Sous Vide was turned off
+            //flip expandMenu to send
+            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
+            on = false;
+            sendButton.setAlpha(0);
+            sendButton.setVisibility(View.VISIBLE);
+
+            menuAppearStart = 1;
+            menuAppearEnd = 0;
+
+            menuFlipStart = 0;
+            menuFlipEnd = 180;
+
+            sendAppearStart = 0;
+            sendAppearEnd = 1;
+
+            sendFlipStart = -180;
+            sendFlipEnd = 0;
+        } else {
+            return;
+        }
+
+        menuFlip.setFloatValues(menuFlipStart, menuFlipEnd);
+        menuFlip.setDuration(fullAnimDuration);
+        menuFlip.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        menuAppear.setFloatValues(menuAppearStart, menuAppearEnd);
+        menuAppear.setDuration(1);
+        menuAppear.setStartDelay(fullAnimDuration/2);
+
+
+        sendFlip.setFloatValues(sendFlipStart, sendFlipEnd);
+        sendFlip.setDuration(fullAnimDuration);
+        sendFlip.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        sendAppear.setFloatValues(sendAppearStart, sendAppearEnd);
+        sendAppear.setDuration(1);
+        sendAppear.setStartDelay(fullAnimDuration/2);
+
+        AnimatorSet modeChange = new AnimatorSet();
+
+        if(on) {
+            modeChange.play(menuFlip).with(menuAppear).with(sendFlip).with(sendAppear);
+        }
+        else {
+            modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+
+        }
+        modeChange.start();
+
     }
 
     @Override

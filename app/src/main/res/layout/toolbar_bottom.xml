@@ -30,7 +30,7 @@
             android:layout_margin="4dp"
             android:textColor="#CCFFFFFF"
             android:textStyle="bold"
-            android:text="Auto"/>
+            android:text="Off"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
