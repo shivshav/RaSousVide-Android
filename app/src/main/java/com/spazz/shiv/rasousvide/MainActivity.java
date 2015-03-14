@@ -184,6 +184,133 @@ public class MainActivity extends ActionBarActivity {
 
     @OnClick(R.id.menu_button)
     public void menuClicked(View view) {
+        slide().start();
+//        long animDuration = 350;
+//
+//        ObjectAnimator sendAlpha = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
+//        ObjectAnimator stopAlpha = ObjectAnimator.ofFloat(stopButton, "alpha", 0);
+//        float alphaStart;
+//        float alphaEnd;
+//
+//        ObjectAnimator sendTranslate = ObjectAnimator.ofFloat(sendButton, "translationY", 0);
+//        ObjectAnimator stopTranslate = ObjectAnimator.ofFloat(stopButton, "translationY", 0);
+//        float sendTranslation;
+//        float stopTranslation;
+//
+//        ObjectAnimator menuRotate = ObjectAnimator.ofFloat(menuButton, "rotation", 0);
+//        float rotateStart;
+//        float rotateEnd;
+//
+//        if(menuOpen) {//do close animation
+//            alphaStart = 1;
+//            alphaEnd = 0;
+//
+//            sendTranslation = sendPos;
+//            stopTranslation = stopPos;
+//
+//            rotateStart = 45;
+//            rotateEnd = 0;
+//
+//            //make buttons non existant for layout calculation & view purposes
+//            sendTranslate.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    super.onAnimationEnd(animation);
+//                    sendButton.setVisibility(View.GONE);
+//                }
+//            });
+//
+//            stopTranslate.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationStart(Animator animation) {
+//                    super.onAnimationStart(animation);
+//                    stopButton.clearAnimation();
+//                }
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    super.onAnimationEnd(animation);
+//                    stopButton.setVisibility(View.GONE);
+//                }
+//            });
+//
+//
+//
+//        }
+//        else {//do open animation
+//
+//            alphaStart = 0;
+//            alphaEnd = 1;
+//            //Items will be set to their desired position
+//            sendTranslation = 0;
+//            stopTranslation = 0;
+//
+//            rotateStart = 0;
+//            rotateEnd = 45;
+//
+//            //make buttons visible
+//            sendTranslate.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationStart(Animator animation) {
+//                    super.onAnimationStart(animation);
+//                    sendButton.setVisibility(View.VISIBLE);
+//                }
+//            });
+//            stopTranslate.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationStart(Animator animation) {
+//                    super.onAnimationStart(animation);
+//                    stopButton.setVisibility(View.VISIBLE);
+//                }
+//
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    super.onAnimationEnd(animation);
+//                    setupStopAnimation();
+//                }
+//            });
+//        }
+//        //TODO:Make alpha animations decelerate/accelerate?
+//        sendAlpha.setFloatValues(alphaStart, alphaEnd);
+//        sendAlpha.setDuration(animDuration);
+//
+//        stopAlpha.setFloatValues(alphaStart, alphaEnd);
+//        stopAlpha.setDuration(animDuration);
+//
+//        //TODO: Make translations accelerate on close and decelerate on open?
+//        sendTranslate.setFloatValues(sendTranslation);
+//        sendTranslate.setDuration(animDuration);
+//        sendTranslate.setInterpolator(new DecelerateInterpolator());
+//
+//        stopTranslate.setFloatValues(stopTranslation);
+//        stopTranslate.setDuration(animDuration);
+//        stopTranslate.setInterpolator(new DecelerateInterpolator());
+//
+//        menuRotate.setFloatValues(rotateStart, rotateEnd);
+//        menuRotate.setDuration(animDuration);
+//        menuRotate.setInterpolator(new BounceInterpolator());
+//
+//        AnimatorSet menuToggle = new AnimatorSet();
+//
+//        menuToggle.play(menuRotate).with(sendTranslate).with(sendAlpha).with(stopTranslate).with(stopAlpha);
+//        menuToggle.start();
+////        sendButton.setTranslationY(sendPos);
+//
+////        stopButton.setTranslationY(stopTranslation);
+//
+//        Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos);
+//
+//        menuOpen = !menuOpen;
+    }
+
+    private void slideOut() {
+
+    }
+
+    private void slideIn() {
+
+    }
+
+    private AnimatorSet slide() {
         long animDuration = 350;
 
         ObjectAnimator sendAlpha = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
@@ -291,14 +418,19 @@ public class MainActivity extends ActionBarActivity {
         AnimatorSet menuToggle = new AnimatorSet();
 
         menuToggle.play(menuRotate).with(sendTranslate).with(sendAlpha).with(stopTranslate).with(stopAlpha);
-        menuToggle.start();
-//        sendButton.setTranslationY(sendPos);
-
-//        stopButton.setTranslationY(stopTranslation);
 
         Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos);
 
         menuOpen = !menuOpen;
+
+        return menuToggle;
+        //menuToggle.start();
+//        sendButton.setTranslationY(sendPos);
+
+//        stopButton.setTranslationY(stopTranslation);
+
+
+
     }
 
     @OnClick(R.id.stop_button)
@@ -349,6 +481,8 @@ public class MainActivity extends ActionBarActivity {
     private void altModeChanged(String mode) {
         long fullAnimDuration = 500;
 
+        AnimatorSet menuToggle = null;
+
         ObjectAnimator menuFlip = ObjectAnimator.ofFloat(menuButton, "rotationY", 0);
         ObjectAnimator menuAppear = ObjectAnimator.ofFloat(menuButton, "alpha", 0);
         float menuAppearStart;
@@ -368,6 +502,7 @@ public class MainActivity extends ActionBarActivity {
         if("Auto".matches(mode)) {//Sous Vide was turned on to sous vide mode
             //flip send button to expandMenu button
             Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
 
             on = true;
 
@@ -408,9 +543,14 @@ public class MainActivity extends ActionBarActivity {
             //flip expandMenu to send
             Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
 
+            if(menuOpen) {
+                menuToggle = slide();
+                Log.d(TAG, "MADE IT HERE!!!");
+            }
+
             on = false;
 //            sendButton.setAlpha(0);
-            sendButton.setVisibility(View.VISIBLE);
+//            sendButton.setVisibility(View.VISIBLE);
 
             menuAppearStart = 1;
             menuAppearEnd = 0;
@@ -468,8 +608,12 @@ public class MainActivity extends ActionBarActivity {
             modeChange.play(menuFlip).with(menuAppear).with(sendFlip).with(sendAppear);
         }
         else {
-            modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
-
+            if(menuToggle != null) {
+                modeChange.play(menuToggle).before(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+            }
+            else {
+                modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+            }
         }
         modeChange.start();
         Log.d(TAG, "On:" + on + "FlipStart:" + menuFlipStart + ", FlipEnd:" + menuFlipEnd);
