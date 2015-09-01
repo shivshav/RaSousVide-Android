@@ -1,14 +1,14 @@
-package com.spazz.shiv.rasousvide.prefs;
+package com.spazz.shiv.rasousvide.ui.prefs;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -16,8 +16,8 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.preference.SwitchPreference;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.spazz.shiv.rasousvide.R;
 
@@ -45,8 +45,11 @@ public class SettingsActivity extends PreferenceActivity  {
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
 
     public static final String KEY_PREF_ADV_VIEW = "advanced_switch";
+    public static final String KEY_PREF_PI_USE_DOMAIN = "pi_use_domain";
+    public static final String KEY_PREF_PI_DOMAIN_NAME = "pi_domain_name";
     public static final String KEY_PREF_PI_IP = "pi_ip";
     public static final String KEY_PREF_PI_PORT = "pi_port";
+    public static final String KEY_PREF_NOTIFICATIONS_RINGTONE = "notifications_new_message_ringtone";
 
     @Override
     protected void onResume() {
@@ -63,6 +66,11 @@ public class SettingsActivity extends PreferenceActivity  {
         super.onPostCreate(savedInstanceState);
 
         setupSimplePreferencesScreen();
+    }
+
+    @Override
+    protected boolean isValidFragment (String fragmentName) {
+        return true;
     }
 
     /**
@@ -87,11 +95,11 @@ public class SettingsActivity extends PreferenceActivity  {
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_pi_settings);
 
-//        // Add 'notifications' preferences, and a corresponding header.
-//        fakeHeader = new PreferenceCategory(this);
-//        fakeHeader.setTitle(R.string.pref_header_notifications);
-//        getPreferenceScreen().addPreference(fakeHeader);
-//        addPreferencesFromResource(R.xml.pref_notification);
+        // Add 'notifications' preferences, and a corresponding header.
+        fakeHeader = new PreferenceCategory(this);
+        fakeHeader.setTitle(R.string.pref_header_notifications);
+        getPreferenceScreen().addPreference(fakeHeader);
+        addPreferencesFromResource(R.xml.pref_notification);
 
 //        // Add 'data and sync' preferences, and a corresponding header.
 //        fakeHeader = new PreferenceCategory(this);
@@ -105,14 +113,50 @@ public class SettingsActivity extends PreferenceActivity  {
 //        bindPreferenceSummaryToValue(findPreference("example_text"));
 
 //        bindPreferenceSummaryToValue(findPreference(KEY_PREF_ADV_VIEW));
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_DOMAIN_NAME));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_IP));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_PORT));
 
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_RINGTONE));
 
 //        bindPreferenceSummaryToValue(findPreference("example_list"));
 //        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
 //        bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+
+        setupPiSettingsScreen();
     }
+
+    private void setupPiSettingsScreen() {
+
+        //TODO: Port these changes over to small screen variant
+        //TODO: Find an easier way to do this
+        final SwitchPreference domainSwitch = (SwitchPreference) findPreference("pi_use_domain");
+
+        final EditTextPreference domainText = (EditTextPreference) findPreference("pi_domain_name");
+        final EditTextPreference ipAddr = (EditTextPreference) findPreference(KEY_PREF_PI_IP);
+        final EditTextPreference port = (EditTextPreference) findPreference(KEY_PREF_PI_PORT);
+
+        domainText.setEnabled(domainSwitch.isChecked());
+        ipAddr.setEnabled(!domainSwitch.isChecked());
+        port.setEnabled(!domainSwitch.isChecked());
+
+        domainSwitch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                if(preference instanceof SwitchPreference) {
+                    boolean useDomain = ((SwitchPreference) preference).isChecked();
+
+                    ipAddr.setEnabled(!useDomain);
+                    port.setEnabled(!useDomain);
+                    domainText.setEnabled(useDomain);
+
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
 
     /**
      * {@inheritDoc}
@@ -245,8 +289,58 @@ public class SettingsActivity extends PreferenceActivity  {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+//            bindPreferenceSummaryToValue(findPreference("example_text"));
+//            bindPreferenceSummaryToValue(findPreference("example_list"));
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class PiPreferencesFragment extends PreferenceFragment {
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.pref_pi_settings);
+
+            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
+            // to their values. When their values change, their summaries are
+            // updated to reflect the new value, per the Android Design
+            // guidelines.
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_IP));
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_PORT));
+
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_DOMAIN_NAME));
+
+            setupPiSettingsFragment();
+
+        }
+
+        private void setupPiSettingsFragment() {
+            final SwitchPreference domainSwitch = (SwitchPreference) findPreference(KEY_PREF_PI_USE_DOMAIN);
+
+            final EditTextPreference domainText = (EditTextPreference) findPreference(KEY_PREF_PI_DOMAIN_NAME);
+            final EditTextPreference ipAddr = (EditTextPreference) findPreference(KEY_PREF_PI_IP);
+            final EditTextPreference port = (EditTextPreference) findPreference(KEY_PREF_PI_PORT);
+
+            domainText.setEnabled(domainSwitch.isChecked());
+            ipAddr.setEnabled(!domainSwitch.isChecked());
+            port.setEnabled(!domainSwitch.isChecked());
+
+            domainSwitch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if(preference instanceof SwitchPreference) {
+                        boolean useDomain = ((SwitchPreference) preference).isChecked();
+
+                        ipAddr.setEnabled(!useDomain);
+                        port.setEnabled(!useDomain);
+                        domainText.setEnabled(useDomain);
+
+                        return true;
+                    }
+                    return false;
+                }
+            });
         }
     }
 
@@ -265,26 +359,7 @@ public class SettingsActivity extends PreferenceActivity  {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-        }
-    }
-
-    /**
-     * This fragment shows data and sync preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class DataSyncPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_data_sync);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_RINGTONE));
         }
     }
 }

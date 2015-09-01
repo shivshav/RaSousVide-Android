@@ -1,8 +1,7 @@
-package com.spazz.shiv.rasousvide.tabs;
+package com.spazz.shiv.rasousvide.ui.tabs;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.media.audiofx.BassBoost;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -20,15 +19,14 @@ import android.widget.TextView;
 import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
-import com.spazz.shiv.rasousvide.prefs.SettingsActivity;
+import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.triggertrap.seekarc.SeekArc;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import butterknife.OnItemSelected;
 
 
@@ -46,15 +44,15 @@ public class SousVideFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
 
-    @InjectView(R.id.seekArcTemp)
+    @Bind(R.id.seekArcTemp)
     SeekArc seekArcTemp;
-    @InjectView(R.id.seekTempText)
+    @Bind(R.id.seekTempText)
     TextView seekTempText;
-    @InjectView(R.id.meal_spinner)
+    @Bind(R.id.meal_spinner)
     Spinner mealSpinner;
-    @InjectView(R.id.meal_spinner_sub_choice)
+    @Bind(R.id.meal_spinner_sub_choice)
     Spinner mealSubChoice;
-    @InjectView(R.id.pid_layout)
+    @Bind(R.id.pid_layout)
     RelativeLayout pidLayout;
     // TODO: Rename and change types of parameters
 
@@ -97,7 +95,7 @@ public class SousVideFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_sous_vide, container, false);
-        ButterKnife.inject(this, rootView);
+        ButterKnife.bind(this, rootView);
         ViewCompat.setElevation(rootView, 50);
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
         seekArcTemp.setProgress(0);
@@ -123,7 +121,7 @@ public class SousVideFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

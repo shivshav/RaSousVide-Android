@@ -22,7 +22,7 @@
             android:value="com.spazz.shiv" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:label="@string/title_activity_main" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".prefs.SettingsActivity"
+            android:name=".ui.prefs.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
     </application>

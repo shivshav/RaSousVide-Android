@@ -1,4 +1,4 @@
-package com.spazz.shiv.rasousvide;
+package com.spazz.shiv.rasousvide.ui;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Outline;
 import android.os.Build;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
@@ -14,6 +13,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,39 +26,39 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
-import com.spazz.shiv.rasousvide.prefs.SettingsActivity;
-import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
+import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
+import com.spazz.shiv.rasousvide.ui.tabs.SousVideFragment;
 
 import java.util.List;
-import java.util.prefs.PreferenceChangeListener;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 
-public class MainActivity extends ActionBarActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
 
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @InjectView(R.id.tabs)
+    @Bind(R.id.tabs)
     PagerSlidingTabStrip tabs;
-    @InjectView(R.id.pager)
+    @Bind(R.id.pager)
     ViewPager pager;
 
-    @InjectView(R.id.toolbar_bottom)
+    @Bind(R.id.toolbar_bottom)
     Toolbar bottomToolbar;
-//    @InjectView(R.id.bottom_layout)
+//    @Bind(R.id.bottom_layout)
 //    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
-    @InjectView(R.id.stop_button)
+    @Bind(R.id.stop_button)
     ImageButton stopButton;
 
-    @InjectView(R.id.send_button)
+    @Bind(R.id.send_button)
     ImageButton sendButton;
 
     private TabsPagerAdapter mAdapter;
@@ -75,7 +75,7 @@ public class MainActivity extends ActionBarActivity implements SharedPreferences
         forceNewEntries();
         Entree.firstTimeMealSetup();
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         //action bar setup
         setSupportActionBar(toolbar);
