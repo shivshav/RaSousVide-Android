@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreference
+        android:key="pi_use_domain"
+        android:title="Use web address"
+        android:defaultValue="false"/>
+
+    <EditTextPreference
+        android:key="pi_domain_name"
+        android:title="Web Address"
+        android:defaultValue="http://example.com"
+        android:selectAllOnFocus="true"
+        android:inputType="textWebEditText"
+        android:singleLine="true"
+        android:maxLines="1"/>
+
+    <EditTextPreference
+        android:key="pi_ip"
+        android:title="@string/pref_title_pi_ip"
+        android:defaultValue="@string/pref_default_pi_ip"
+        android:selectAllOnFocus="true"
+        android:inputType="phone"
+        android:singleLine="true"
+        android:maxLines="1" />
+
+    <EditTextPreference
+        android:key="pi_port"
+        android:title="@string/pref_title_pi_port"
+        android:defaultValue="@string/pref_default_pi_port"
+        android:selectAllOnFocus="true"
+        android:inputType="number"
+        android:singleLine="true"
+        android:maxLines="1" />
+</PreferenceScreen>

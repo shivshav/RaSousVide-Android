@@ -1,20 +1,25 @@
-package com.spazz.shiv.rasousvide;
+package com.spazz.shiv.rasousvide.ui;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.graphics.Outline;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.view.animation.AlphaAnimation;
@@ -25,36 +30,50 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.R;
+import com.spazz.shiv.rasousvide.database.Entree;
+import com.spazz.shiv.rasousvide.database.Meal;
+import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
+import com.spazz.shiv.rasousvide.ui.tabs.SousVideFragment;
 import com.spazz.shiv.rasousvide.model.CookingNotificationService;
 import com.spazz.shiv.rasousvide.model.RestClient;
 import com.spazz.shiv.rasousvide.model.ShivVideResponse;
 import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
 
+import java.util.List;
+
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
+    private static final String TAG = "MainActivity";
 
-    private static final String TAG = "MAIN ACTIVITY";
-    @InjectView(R.id.toolbar) Toolbar toolbar;
-    @InjectView(R.id.tabs) PagerSlidingTabStrip tabs;
-    @InjectView(R.id.pager) ViewPager pager;
-    @InjectView(R.id.toolbar_bottom) Toolbar bottomToolbar;
-    @InjectView(R.id.current_mode) TextView currModeTV;
-    @InjectView(R.id.current_temp) TextView currTempTV;
-    @InjectView(R.id.current_temp_units) TextView currTempUnitsTV;
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
+    @Bind(R.id.tabs)
+    PagerSlidingTabStrip tabs;
+    @Bind(R.id.pager)
+    ViewPager pager;
 
+    @Bind(R.id.toolbar_bottom)
+    Toolbar bottomToolbar;
+//    @Bind(R.id.bottom_layout)
+//    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
-    @InjectView(R.id.stop_button) ImageButton stopButton;
-    @InjectView(R.id.send_button) ImageButton sendButton;
+    @Bind(R.id.stop_button)
+    ImageButton stopButton;
+
+    @Bind(R.id.send_button)
+    ImageButton sendButton;
 
     private TabsPagerAdapter mAdapter;
+
+    SharedPreferences prefs;
+
+    private Boolean firstTime = null;
 
     // Handler and Thread to query pi at interval
     private Boolean inApp = false;
@@ -79,7 +98,10 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ButterKnife.inject(this);
+        forceNewEntries();
+        Entree.firstTimeMealSetup();
+
+        ButterKnife.bind(this);
 
         //action bar setup
         setSupportActionBar(toolbar);
@@ -93,20 +115,62 @@ public class MainActivity extends ActionBarActivity {
 //        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
         setupStopAnimation();
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+//        if(isFirstTime()) {
+//            //Execute database setup here
+//            Entree.firstTimeMealSetup();
+//        }
         // start interval querying of Pi
         mPiQueryAtInterval.run();
+    }
+
+    @Override
+    public void onResume() {
+        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
+
+        super.onResume();
+        if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
+            mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_ADV_VIEW);
+        }
     }
 
     @Override
     protected void onPause() {
         mHandler.removeCallbacks(mPiQueryAtInterval);
         super.onPause();
+        //prefs.unregisterOnSharedPreferenceChangeListener(listener);
     }
+    private void forceNewEntries() {
+        List<Meal> mealList = Meal.listAll(Meal.class);
+        if(mealList != null) {
+            Meal.deleteAll(Meal.class);
+        }
 
-    @Override
-    protected void onResume() {
-        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
-        super.onResume();
+        List<Entree> entreeList = Entree.listAll(Entree.class);
+        if(entreeList != null) {
+            Entree.deleteAll(Entree.class);
+        }
+
+
+    }
+    /**
+     * Checks if the user is opening the app for the first time.
+     * Note that this method should be placed inside an activity and it can be called multiple times.
+     * @return boolean
+     */
+    private boolean isFirstTime() {
+        if (firstTime == null) {
+            SharedPreferences mPreferences = this.getSharedPreferences("first_time", Context.MODE_PRIVATE);
+            firstTime = mPreferences.getBoolean("firstTime", true);
+            if (firstTime) {
+                SharedPreferences.Editor editor = mPreferences.edit();
+                editor.putBoolean("firstTime", false);
+                editor.apply();
+            }
+        }
+        return firstTime;
     }
 
     private void querySousVide() {
@@ -172,11 +236,11 @@ public class MainActivity extends ActionBarActivity {
     public void stopClicked(View view) {
         view.clearAnimation();
     }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setupBottomToolbar() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
                 @Override
+                @TargetApi(21)
                 public void getOutline(View view, Outline outline) {
                     // Or read size directly from the view's width/height
                     int size = getResources().getDimensionPixelSize(R.dimen.round_button_diameter);
@@ -184,6 +248,7 @@ public class MainActivity extends ActionBarActivity {
                 }
             };
             sendButton.setOutlineProvider(viewOutlineProvider);
+        }
     }
 
     @Override
@@ -202,11 +267,19 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sf, String key) {
+        Log.e("change", "pref changed");
+    }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -214,10 +287,11 @@ public class MainActivity extends ActionBarActivity {
      */
     public class TabsPagerAdapter extends FragmentPagerAdapter {
 
-        private final String[] TAB_TITLES = getResources().getStringArray(R.array.sliding_tab_names);
-
+        private String[] tabTitles;
+        private boolean advancedView = false;
         public TabsPagerAdapter(FragmentManager fm) {
             super(fm);
+            updateTabTitles(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()), SettingsActivity.KEY_PREF_ADV_VIEW);
         }
 
         @Override
@@ -230,16 +304,35 @@ public class MainActivity extends ActionBarActivity {
                 case 1:
                     return SousVideFragment.newInstance(position + 1);
                 case 2:
-                    return SousVideFragment.newInstance(position + 1);
+                    if(advancedView) {return SousVideFragment.newInstance(position + 1);}
+                    else {return null;}
                 default: return null;
             }
         }
 
         @Override
-        public int getCount() { return TAB_TITLES.length;}
+        public int getCount() { return tabTitles.length;}
 
         @Override
-        public CharSequence getPageTitle(int position) { return TAB_TITLES[position];}
+        public CharSequence getPageTitle(int position) { return tabTitles[position];}
 
+        public void updateTabTitles(SharedPreferences sharedPref, String key) {
+            String[] basTitles = getResources().getStringArray(R.array.sliding_tab_basic_names);
+            String[] advTitles = null;
+            advancedView = sharedPref.getBoolean(key, false);
+            if(advancedView) {
+                advTitles = getResources().getStringArray(R.array.sliding_tab_advanced_names);
+            }
+            tabTitles = new String[basTitles.length + (advTitles == null ? 0:advTitles.length)];
+            System.arraycopy(basTitles, 0, tabTitles, 0, basTitles.length);
+            if (advTitles != null) {
+                System.arraycopy(advTitles, 0, tabTitles, basTitles.length, advTitles.length);
+            }
+            notifyDataSetChanged();
+        }
+
+        public boolean getAdvancedVIew() {
+            return this.advancedView;
+        }
     }
 }

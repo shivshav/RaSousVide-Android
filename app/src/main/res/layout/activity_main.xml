@@ -37,7 +37,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/tabs"
         android:layout_above="@id/toolbar_bottom"
-        tools:context="com.spazz.shiv.rasousvide.MainActivity" />
+        tools:context="com.spazz.shiv.rasousvide.ui.MainActivity" />
 
     <ImageButton
         android:id="@+id/send_button"
