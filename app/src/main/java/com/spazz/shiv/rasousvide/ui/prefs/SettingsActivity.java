@@ -2,6 +2,7 @@ package com.spazz.shiv.rasousvide.ui.prefs;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -20,6 +21,7 @@ import android.preference.SwitchPreference;
 import android.text.TextUtils;
 
 import com.spazz.shiv.rasousvide.R;
+import com.spazz.shiv.rasousvide.rest.RestClient;
 
 import java.util.List;
 
@@ -271,8 +273,6 @@ public class SettingsActivity extends PreferenceActivity  {
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
     }
-
-
 
     /**
      * This fragment shows general preferences only. It is used when the

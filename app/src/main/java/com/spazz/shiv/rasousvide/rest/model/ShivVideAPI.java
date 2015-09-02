@@ -1,4 +1,4 @@
-package com.spazz.shiv.rasousvide.model;
+package com.spazz.shiv.rasousvide.rest.model;
 
 import retrofit.Callback;
 import retrofit.http.GET;

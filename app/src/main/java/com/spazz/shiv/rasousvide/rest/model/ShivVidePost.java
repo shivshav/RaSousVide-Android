@@ -1,4 +1,4 @@
-package com.spazz.shiv.rasousvide.model;
+package com.spazz.shiv.rasousvide.rest.model;
 
 public class ShivVidePost {     // realworld data
     private float cycle_time;       // 2.0

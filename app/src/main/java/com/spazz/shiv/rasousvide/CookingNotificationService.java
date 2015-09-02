@@ -1,4 +1,4 @@
-package com.spazz.shiv.rasousvide.model;
+package com.spazz.shiv.rasousvide;
 
 import android.app.Service;
 import android.content.Intent;

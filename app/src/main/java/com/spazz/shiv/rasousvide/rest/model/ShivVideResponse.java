@@ -1,4 +1,4 @@
-package com.spazz.shiv.rasousvide.model;
+package com.spazz.shiv.rasousvide.rest.model;
 
 /**
  * Created by pula on 1/18/15.

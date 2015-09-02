@@ -11,7 +11,7 @@ import java.util.List;
  * TODO: Add legal stuff
  * TODO: Add javadocs stuff
  */
-public class Entree extends SugarRecord<Entree> {
+public class Entree extends SugarRecord {
 
     //TODO:Figure out the structure of this when i get back to it
     private final static Entree INITIAL_ENTREES[] = {

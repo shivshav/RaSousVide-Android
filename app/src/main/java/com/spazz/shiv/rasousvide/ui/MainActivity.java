@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.Intent;
 import android.graphics.Outline;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -13,7 +12,6 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -25,7 +23,6 @@ import android.view.ViewOutlineProvider;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -35,40 +32,40 @@ import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
 import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.spazz.shiv.rasousvide.ui.tabs.SousVideFragment;
-import com.spazz.shiv.rasousvide.model.CookingNotificationService;
-import com.spazz.shiv.rasousvide.model.RestClient;
-import com.spazz.shiv.rasousvide.model.ShivVideResponse;
-import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
+import com.spazz.shiv.rasousvide.CookingNotificationService;
+import com.spazz.shiv.rasousvide.rest.RestClient;
+import com.spazz.shiv.rasousvide.rest.model.ShivVideResponse;
 
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
 
-    @Bind(R.id.toolbar)
-    Toolbar toolbar;
-    @Bind(R.id.tabs)
-    PagerSlidingTabStrip tabs;
-    @Bind(R.id.pager)
-    ViewPager pager;
+    @Bind(R.id.toolbar) Toolbar toolbar;
+    @Bind(R.id.tabs) PagerSlidingTabStrip tabs;
+    @Bind(R.id.pager) ViewPager pager;
 
-    @Bind(R.id.toolbar_bottom)
-    Toolbar bottomToolbar;
+    @Bind(R.id.toolbar_bottom) Toolbar bottomToolbar;
 //    @Bind(R.id.bottom_layout)
 //    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
-    @Bind(R.id.stop_button)
-    ImageButton stopButton;
+    @Bind(R.id.stop_button) ImageButton stopButton;
 
-    @Bind(R.id.send_button)
-    ImageButton sendButton;
+    @Bind(R.id.send_button) ImageButton sendButton;
 
+    @Bind(R.id.current_mode) TextView currModeTV;
+
+    @Bind(R.id.current_temp) TextView currTempTV;
+    @Bind(R.id.current_temp_units) TextView currTempUnitsTV;
     private TabsPagerAdapter mAdapter;
 
     SharedPreferences prefs;
@@ -110,9 +107,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         pager.setAdapter(mAdapter);
         tabs.setViewPager(pager);
 
-//        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
-//                .getDisplayMetrics());
-//        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
         setupStopAnimation();
 
@@ -180,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             @Override
             public void success(ShivVideResponse svResponse, Response response) {
                 mQuerying = false;
+                Log.e(TAG, "Querying pi");
                 // do cool shit
                 currModeTV.setText(svResponse.getMode());
                 currTempTV.setText(svResponse.getTemp());
@@ -221,16 +216,29 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //        });
     }
 
-    @OnClick(R.id.send_button) @SuppressWarnings("unused")
+    @OnClick(R.id.send_button)
     public void sendButtonClick(View v) {
-        Intent cooking = new Intent(this, CookingNotificationService.class);
-       if(!serviceRunning) {
-           startService(cooking);
-           serviceRunning = true;
-       } else {
-           stopService(cooking);
-           serviceRunning = false;
-       }
+//        Intent cooking = new Intent(this, CookingNotificationService.class);
+//       if(!serviceRunning) {
+//           startService(cooking);
+//           serviceRunning = true;
+//       } else {
+//           stopService(cooking);
+//           serviceRunning = false;
+//       }
+        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
+            @Override
+            public void success(ShivVideResponse shivVideResponse, Response response) {
+                Log.e("SEND CALLBACK", "Status: " + response.getStatus());
+                Log.e("SEND CALLBACK", "Temp: " + shivVideResponse.getTemp());
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.e("SEND CALLBACK", "FAILURE TO SEND:" + error.getBody());
+            }
+        });
+
     }
     @OnClick(R.id.stop_button) @SuppressWarnings("unused")
     public void stopClicked(View view) {

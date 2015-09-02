@@ -9,7 +9,7 @@ import com.orm.SugarRecord;
  * TODO: Add legal stuff
  * TODO: Add javadocs stuff
  */
-public class Meal extends SugarRecord<Meal> {
+public class Meal extends SugarRecord {
     public static final long HOUR = 60*60*1;
 
     Entree entree;
