@@ -37,6 +37,7 @@ import com.spazz.shiv.rasousvide.rest.RestClient;
 import com.spazz.shiv.rasousvide.rest.model.ShivVideResponse;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -44,6 +45,12 @@ import butterknife.OnClick;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
+import rx.Scheduler;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.android.schedulers.HandlerScheduler;
+import rx.schedulers.Schedulers;
 
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -90,6 +97,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     //TODO remove this debugging var
     private Boolean serviceRunning = false;
 
+    private Subscription querySubscription;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +127,31 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //        }
         // start interval querying of Pi
         mPiQueryAtInterval.run();
+
+        querySubscription = setupObservable();
+    }
+
+    private Subscription setupObservable() {
+        return Observable.interval(1, TimeUnit.SECONDS)
+                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
+                .map(
+                        response -> {
+                            Log.d("OBSERVABLE", "Current thread: " + Thread.currentThread());
+                            String tempStr = response.getTemp();
+                            return tempStr;
+                        }
+                )
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        (temp) -> {
+                            currTempTV.setText(temp);
+                            Log.d("OBSERVABLE UI", "Set temp to " + temp);
+                        },
+
+                        (e) -> Log.e("OBSERVABLE HERRE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
+                        () -> Log.d("OBSERVABLE", "onComplete Called")
+                );
+
     }
 
     @Override
@@ -133,6 +167,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onPause() {
         mHandler.removeCallbacks(mPiQueryAtInterval);
+        if(!querySubscription.isUnsubscribed()) {
+            querySubscription.unsubscribe();
+        }
         super.onPause();
         //prefs.unregisterOnSharedPreferenceChangeListener(listener);
     }
@@ -170,33 +207,33 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private void querySousVide() {
         mQuerying = true;
 
-        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
-            @Override
-            public void success(ShivVideResponse svResponse, Response response) {
-                mQuerying = false;
-                Log.e(TAG, "Querying pi");
-                // do cool shit
-                currModeTV.setText(svResponse.getMode());
-                currTempTV.setText(svResponse.getTemp());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                mQuerying = false;
-                // do sad stuff
-                // set defaults for when there is no internet
-                if (error.getKind() == RetrofitError.Kind.NETWORK) {
-                    Log.i(TAG, "No Internet Connection: " + error);
-                } else {
-                    // something went wrong
-                    Log.i(TAG, "Check dis error: " + error);
-                }
-                currModeTV.setText("Disconnected");
-                currTempTV.setText("Room Temp");
-                currTempUnitsTV.setText("");
-
-            }
-        });
+//        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
+//            @Override
+//            public void success(ShivVideResponse svResponse, Response response) {
+//                mQuerying = false;
+//                Log.e(TAG, "Querying pi");
+//                // do cool shit
+//                currModeTV.setText(svResponse.getMode());
+//                currTempTV.setText(svResponse.getTemp());
+//            }
+//
+//            @Override
+//            public void failure(RetrofitError error) {
+//                mQuerying = false;
+//                // do sad stuff
+//                // set defaults for when there is no internet
+//                if (error.getKind() == RetrofitError.Kind.NETWORK) {
+//                    Log.i(TAG, "No Internet Connection: " + error);
+//                } else {
+//                    // something went wrong
+//                    Log.i(TAG, "Check dis error: " + error);
+//                }
+//                currModeTV.setText("Disconnected");
+//                currTempTV.setText("Room Temp");
+//                currTempUnitsTV.setText("");
+//
+//            }
+//        });
     }
 
     private void setupStopAnimation(){
@@ -226,18 +263,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //           stopService(cooking);
 //           serviceRunning = false;
 //       }
-        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
-            @Override
-            public void success(ShivVideResponse shivVideResponse, Response response) {
-                Log.e("SEND CALLBACK", "Status: " + response.getStatus());
-                Log.e("SEND CALLBACK", "Temp: " + shivVideResponse.getTemp());
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                Log.e("SEND CALLBACK", "FAILURE TO SEND:" + error.getBody());
-            }
-        });
+//        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
+//            @Override
+//            public void success(ShivVideResponse shivVideResponse, Response response) {
+//                Log.e("SEND CALLBACK", "Status: " + response.getStatus());
+//                Log.e("SEND CALLBACK", "Temp: " + shivVideResponse.getTemp());
+//            }
+//
+//            @Override
+//            public void failure(RetrofitError error) {
+//                Log.e("SEND CALLBACK", "FAILURE TO SEND:" + error.getBody());
+//            }
+//        });
 
     }
     @OnClick(R.id.stop_button) @SuppressWarnings("unused")

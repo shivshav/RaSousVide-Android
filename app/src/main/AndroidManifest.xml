@@ -23,7 +23,6 @@
             android:name="DOMAIN_PACKAGE_NAME"
             android:value="com.spazz.shiv" />
 
-
         <service
             android:name=".CookingNotificationService"
             android:exported="false" />
