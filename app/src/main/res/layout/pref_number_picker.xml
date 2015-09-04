@@ -11,6 +11,7 @@
      limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center_horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -33,6 +34,7 @@
         android:gravity="center"
         android:singleLine="true"
         android:text="Minutes"/>
+
     <NumberPicker
         android:id="@+id/hour_picker"
         android:layout_width="wrap_content"
@@ -41,7 +43,8 @@
         android:layout_toStartOf="@id/minute_picker"
         android:layout_toLeftOf="@id/minute_picker"
         android:layout_margin="8dp"
-        android:padding="4dp"/>
+        android:padding="4dp"
+        tools:visibility="gone"/>
 
     <TextView
         android:id="@+id/hour_label"
@@ -54,7 +57,8 @@
         android:layout_alignRight="@id/hour_picker"
         android:padding="4dp"
         android:gravity="center"
-        android:text="Hours"/>
+        android:text="Hours"
+        tools:visibility="gone"/>
 
     <NumberPicker
         android:id="@+id/second_picker"

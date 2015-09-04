@@ -21,10 +21,11 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 
 import com.spazz.shiv.rasousvide.R;
 
@@ -40,7 +41,7 @@ public class DurationPickerPreference extends DialogPreference {
     private static final String HASHKEY_MINUTES = "minutes";
     private static final String HASHKEY_SECONDS = "seconds";
 
-    private int hourMin, hourMax, minuteMin, minuteMax, secondMin, secondMax, mDefault;
+    private int hourMin, hourMax, minuteMin, minuteMax, secondMin, secondMax, pickersToShow;
 
 //    private String mMaxExternalKey, mMinExternalKey;
 
@@ -67,6 +68,8 @@ public class DurationPickerPreference extends DialogPreference {
         secondMax = numberPickerType.getInt(R.styleable.DurationPickerPreference_secondMax, 60);
         secondMin = numberPickerType.getInt(R.styleable.DurationPickerPreference_secondMin, 0);
 
+        TypedValue val = new TypedValue();
+        pickersToShow = numberPickerType.getInt(R.styleable.DurationPickerPreference_pickers, 0x4|0x2|0x1);
 //        dialogType.recycle();
         numberPickerType.recycle();
     }
@@ -92,15 +95,18 @@ public class DurationPickerPreference extends DialogPreference {
 
         HashMap<String, Integer> times = convertIntegerToTime(time);
 
-        hourPicker = setupPicker(view, R.id.hour_picker, hourMin, hourMax, times.get(HASHKEY_HOURS));
-        minutePicker = setupPicker(view, R.id.minute_picker, minuteMin, minuteMax, times.get(HASHKEY_MINUTES));
-        secondPicker = setupPicker(view, R.id.second_picker, secondMin, secondMax, times.get(HASHKEY_SECONDS));
+
+
+        hourPicker = setupPicker(view, R.id.hour_picker, R.id.hour_label, hourMin, hourMax, times.get(HASHKEY_HOURS), pickersToShow & 0x4);
+        minutePicker = setupPicker(view, R.id.minute_picker, R.id.minute_label, minuteMin, minuteMax, times.get(HASHKEY_MINUTES), pickersToShow & 0x2);
+        secondPicker = setupPicker(view, R.id.second_picker, R.id.second_label, secondMin, secondMax, times.get(HASHKEY_SECONDS), pickersToShow & 0x1);
 
         return view;
     }
 
-    private NumberPicker setupPicker(View view, int resId, int min, int max, Integer defaultVal) {
-        NumberPicker numberPicker = (NumberPicker) view.findViewById(resId);
+    private NumberPicker setupPicker(View view, int pickerResId, int labelResId, int min, int max, Integer defaultVal, int noShow) {
+        NumberPicker numberPicker = (NumberPicker) view.findViewById(pickerResId);
+        TextView pickerLabel = (TextView) view.findViewById(labelResId);
 
         // Initialize state
         numberPicker.setMaxValue(max);
@@ -108,6 +114,10 @@ public class DurationPickerPreference extends DialogPreference {
         numberPicker.setValue(defaultVal);
         numberPicker.setWrapSelectorWheel(true);
 
+        if(noShow == 0) {
+            numberPicker.setVisibility(View.GONE);
+            pickerLabel.setVisibility(View.GONE);
+        }
         //TODO: FIgure out how to stop keyboard from coming up
 //        // No keyboard popup
 //        EditText textInput = (EditText) numberPicker.findViewById(android.R.id.);

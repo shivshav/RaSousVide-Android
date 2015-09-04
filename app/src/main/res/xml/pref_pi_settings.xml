@@ -38,12 +38,14 @@
         android:title="Check Temperature Every..."
         android:dialogTitle="Temperature Update Interval"
         android:positiveButtonText="Set"
-        android:negativeButtonText="@android:string/cancel"/>
+        android:negativeButtonText="@android:string/cancel"
+        app:pickers="minute|second"/>
 
     <com.spazz.shiv.rasousvide.ui.prefs.DurationPickerPreference
         android:key="pi_off_refresh_rate"
         android:title="Check Power Every..."
         android:dialogTitle="Power Status Check Interval"
         android:positiveButtonText="Set"
-        android:negativeButtonText="@android:string/cancel"/>
+        android:negativeButtonText="@android:string/cancel"
+        app:pickers="hour|minute|second"/>
 </PreferenceScreen>

@@ -13,5 +13,10 @@
         <attr name="secondMax" format="integer"/>
         <attr name="secondMin" format="integer"/>
 
+        <attr name="pickers">
+            <flag name="hour" value="0x4"/>
+            <flag name="minute" value="0x2"/>
+            <flag name="second" value="0x1"/>
+        </attr>
     </declare-styleable>
 </resources>
