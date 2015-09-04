@@ -64,8 +64,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Bind(R.id.pager) ViewPager pager;
 
     @Bind(R.id.toolbar_bottom) Toolbar bottomToolbar;
-//    @Bind(R.id.bottom_layout)
-//    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
     @Bind(R.id.stop_button) ImageButton stopButton;
@@ -81,24 +79,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     SharedPreferences prefs;
 
     private Boolean firstTime = null;
-
-    // Handler and Thread to query pi at interval
-    private Boolean inApp = false;
-    private Boolean mQuerying = false;
-    final int INTERVAL = 10000;
-    final Handler mHandler = new Handler();
-    final Runnable mPiQueryAtInterval = new Runnable(){
-        public void run() {
-            if (inApp && !mQuerying) {
-                querySousVide();
-            }
-            mHandler.postDelayed(this, INTERVAL);
-        }
-
-    };
-
-    //TODO remove this debugging var
-    private Boolean serviceRunning = false;
 
     private boolean serviceBound;
     private CookingNotificationService cookingNotificationService;
@@ -131,42 +111,30 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //            //Execute database setup here
 //            Entree.firstTimeMealSetup();
 //        }
-        // start interval querying of Pi
-        mPiQueryAtInterval.run();
-
-//        querySubscription = setupObservable();
     }
 
-    private Subscription setupObservable() {
-        //TODO: Have a long and short timer interval that is for 'off' and 'on' modes
-        //TODO: Make above user configurable
-        //TODO: Setup observable as part of service
-        // TODO: 9/1/15 start service immediately when the app starts
-
-        return Observable.interval(5, TimeUnit.SECONDS)
-                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
-//                .map(
-//                        response -> {
-//                            Log.d("OBSERVABLE", "Current thread: " + Thread.currentThread());
-//                            String tempStr = response.getTemp();
-//                            return tempStr;
-//                        }
-//                )
-                .distinct()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        (response) -> {
-                            currTempTV.setText(response.getTemp());
-                            currModeTV.setText(response.getMode());
-
-                            Log.d("OBSERVABLE UI", "Set temp to " + response.getTemp());
-                        },
-
-                        (e) -> Log.e("OBSERVABLE HERRE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
-                        () -> Log.d("OBSERVABLE", "onComplete Called")
-                );
-
-    }
+//    private Subscription setupObservable() {
+//        //TODO: Have a long and short timer interval that is for 'off' and 'on' modes
+//        //TODO: Make above user configurable
+//        // TODO: 9/1/15 start service immediately when the app starts
+//
+//        return Observable.interval(5, TimeUnit.SECONDS)
+//                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
+//                .distinct()
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(
+//                        (response) -> {
+//                            currTempTV.setText(response.getTemp());
+//                            currModeTV.setText(response.getMode());
+//
+//                            Log.d("OBSERVABLE UI", "Set temp to " + response.getTemp());
+//                        },
+//
+//                        (e) -> Log.e("OBSERVABLE HERRE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
+//                        () -> Log.d("OBSERVABLE", "onComplete Called")
+//                );
+//
+//    }
 
     @Override
     public void onStart() {
@@ -181,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onResume() {
-//        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
 
         super.onResume();
         if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
@@ -190,15 +157,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Log.d(TAG, "onResume of Activity run");
 
         if(cookingNotificationService != null && (querySubscription == null || querySubscription.isUnsubscribed())) {
-
             querySubscription = createPollingSubscription();
         }
     }
 
     private Subscription createPollingSubscription() {
         return cookingNotificationService.getPollingObservable()
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(num -> Log.d(TAG, "Polling... #" + num));
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         (response) -> {
@@ -215,7 +179,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     protected void onPause() {
-        mHandler.removeCallbacks(mPiQueryAtInterval);
         if(!querySubscription.isUnsubscribed()) {
             querySubscription.unsubscribe();
         }
@@ -248,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
 
     }
+
     /**
      * Checks if the user is opening the app for the first time.
      * Note that this method should be placed inside an activity and it can be called multiple times.
@@ -264,38 +228,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         }
         return firstTime;
-    }
-
-    private void querySousVide() {
-        mQuerying = true;
-
-//        RestClient.getAPI().getCurrentPiParams(new Callback<ShivVideResponse>() {
-//            @Override
-//            public void success(ShivVideResponse svResponse, Response response) {
-//                mQuerying = false;
-//                Log.e(TAG, "Querying pi");
-//                // do cool shit
-//                currModeTV.setText(svResponse.getMode());
-//                currTempTV.setText(svResponse.getTemp());
-//            }
-//
-//            @Override
-//            public void failure(RetrofitError error) {
-//                mQuerying = false;
-//                // do sad stuff
-//                // set defaults for when there is no internet
-//                if (error.getKind() == RetrofitError.Kind.NETWORK) {
-//                    Log.i(TAG, "No Internet Connection: " + error);
-//                } else {
-//                    // something went wrong
-//                    Log.i(TAG, "Check dis error: " + error);
-//                }
-//                currModeTV.setText("Disconnected");
-//                currTempTV.setText("Room Temp");
-//                currTempUnitsTV.setText("");
-//
-//            }
-//        });
     }
 
     private void setupStopAnimation(){

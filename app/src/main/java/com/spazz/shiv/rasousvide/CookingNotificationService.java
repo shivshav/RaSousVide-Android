@@ -26,13 +26,6 @@ public class CookingNotificationService extends Service {
 
     private Observable<ShivVideResponse> pollingObservable;
 
-//    private ServiceListener callback;
-
-    public interface ServiceListener {
-        public void onServiceStarted();
-        public void onServiceStopped();
-    }
-
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -75,17 +68,9 @@ public class CookingNotificationService extends Service {
     }
 
     private Observable<ShivVideResponse> createPollingObservable() {
-//        return Observable.interval(3, TimeUnit.SECONDS);
-        return Observable.interval(1, TimeUnit.SECONDS)
+        return Observable.interval(5, TimeUnit.SECONDS)
                 .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
-//                .map(
-//                        response -> {
-//                            Log.d("OBSERVABLE", "Current thread: " + Thread.currentThread());
-//                            String tempStr = response.getTemp();
-//                            return tempStr;
-//                        }
-//                )
-                .distinct();
+                .distinctUntilChanged();
     }
 
     /**
