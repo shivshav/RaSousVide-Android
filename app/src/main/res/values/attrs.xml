@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DurationPickerPreference">
+        <attr name="maxExternal" format="string"/>
+        <attr name="minExternal" format="string"/>
+
+        <attr name="hourMax" format="integer"/>
+        <attr name="hourMin" format="integer"/>
+
+        <attr name="minuteMax" format="integer"/>
+        <attr name="minuteMin" format="integer"/>
+
+        <attr name="secondMax" format="integer"/>
+        <attr name="secondMin" format="integer"/>
+
+    </declare-styleable>
+</resources>

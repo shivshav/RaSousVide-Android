@@ -116,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //    private Subscription setupObservable() {
 //        //TODO: Have a long and short timer interval that is for 'off' and 'on' modes
 //        //TODO: Make above user configurable
-//        // TODO: 9/1/15 start service immediately when the app starts
 //
 //        return Observable.interval(5, TimeUnit.SECONDS)
 //                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())

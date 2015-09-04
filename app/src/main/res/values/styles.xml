@@ -9,6 +9,9 @@
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>
         <item name="colorAccent">@color/color_accent</item>
+        <item name="colorControlHighlight">@color/DebugRed</item>
+        <item name="colorControlActivated">@color/DebugPink</item>
+        <item name="colorControlNormal">@color/DebugGreen</item>
         <!--<item name="android:textColorPrimary">@android:color/primary_text_dark</item>-->
         <item name="seekArcStyle">@style/SeekArcLight</item>
 

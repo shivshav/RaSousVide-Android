@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <SwitchPreference
         android:key="pi_use_domain"
         android:title="Use web address"
@@ -31,4 +32,12 @@
         android:inputType="number"
         android:singleLine="true"
         android:maxLines="1" />
+
+    <com.spazz.shiv.rasousvide.ui.prefs.DurationPickerPreference
+        android:key="pi_temp_refresh_rate"
+        android:title="Temperature Refresh Rate"
+        android:dialogMessage="Where does this go?"
+        android:dialogTitle="Is This Different?"
+        android:positiveButtonText="Set"
+        android:negativeButtonText="@android:string/cancel"/>
 </PreferenceScreen>
