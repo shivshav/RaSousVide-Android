@@ -2,16 +2,53 @@ package com.spazz.shiv.rasousvide;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
+
+import com.spazz.shiv.rasousvide.rest.RestClient;
+import com.spazz.shiv.rasousvide.rest.model.ShivVideResponse;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
+
 
 /**
  * Created by pula on 2/24/15.
  */
 public class CookingNotificationService extends Service {
+
+    private static final String TAG = CookingNotificationService.class.getSimpleName();
+    private final IBinder binder = new LocalBinder();
+
+    private Observable<ShivVideResponse> pollingObservable;
+
+//    private ServiceListener callback;
+
+    public interface ServiceListener {
+        public void onServiceStarted();
+        public void onServiceStopped();
+    }
+
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class LocalBinder extends Binder {
+        public CookingNotificationService getService() {
+            // Return this instance of CookingNotificationService so clients can call public methods
+            return CookingNotificationService.this;
+        }
+
+    }
+
     @Override
     public void onCreate() {
         Toast.makeText(this, "Starting Service", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "onCreate of Service");
     }
 
     /**
@@ -32,7 +69,23 @@ public class CookingNotificationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "onStartCommand()", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "onStartCommand Service run");
+        pollingObservable = createPollingObservable();
         return START_NOT_STICKY;
+    }
+
+    private Observable<ShivVideResponse> createPollingObservable() {
+//        return Observable.interval(3, TimeUnit.SECONDS);
+        return Observable.interval(1, TimeUnit.SECONDS)
+                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
+//                .map(
+//                        response -> {
+//                            Log.d("OBSERVABLE", "Current thread: " + Thread.currentThread());
+//                            String tempStr = response.getTemp();
+//                            return tempStr;
+//                        }
+//                )
+                .distinct();
     }
 
     /**
@@ -44,7 +97,7 @@ public class CookingNotificationService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
     }
 
     /**
@@ -55,5 +108,9 @@ public class CookingNotificationService extends Service {
     @Override
     public void onDestroy() {
         Toast.makeText(this, "DESTROY ALL SERVICE", Toast.LENGTH_SHORT).show();
+    }
+
+    public Observable<ShivVideResponse> getPollingObservable() {
+        return pollingObservable;
     }
 }

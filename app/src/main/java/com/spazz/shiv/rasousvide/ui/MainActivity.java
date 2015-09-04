@@ -1,11 +1,14 @@
 package com.spazz.shiv.rasousvide.ui;
 
 import android.annotation.TargetApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Outline;
 import android.os.Build;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -97,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     //TODO remove this debugging var
     private Boolean serviceRunning = false;
 
+    private boolean serviceBound;
+    private CookingNotificationService cookingNotificationService;
+
     private Subscription querySubscription;
 
     @Override
@@ -128,24 +134,32 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         // start interval querying of Pi
         mPiQueryAtInterval.run();
 
-        querySubscription = setupObservable();
+//        querySubscription = setupObservable();
     }
 
     private Subscription setupObservable() {
-        return Observable.interval(1, TimeUnit.SECONDS)
+        //TODO: Have a long and short timer interval that is for 'off' and 'on' modes
+        //TODO: Make above user configurable
+        //TODO: Setup observable as part of service
+        // TODO: 9/1/15 start service immediately when the app starts
+
+        return Observable.interval(5, TimeUnit.SECONDS)
                 .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
-                .map(
-                        response -> {
-                            Log.d("OBSERVABLE", "Current thread: " + Thread.currentThread());
-                            String tempStr = response.getTemp();
-                            return tempStr;
-                        }
-                )
+//                .map(
+//                        response -> {
+//                            Log.d("OBSERVABLE", "Current thread: " + Thread.currentThread());
+//                            String tempStr = response.getTemp();
+//                            return tempStr;
+//                        }
+//                )
+                .distinct()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        (temp) -> {
-                            currTempTV.setText(temp);
-                            Log.d("OBSERVABLE UI", "Set temp to " + temp);
+                        (response) -> {
+                            currTempTV.setText(response.getTemp());
+                            currModeTV.setText(response.getMode());
+
+                            Log.d("OBSERVABLE UI", "Set temp to " + response.getTemp());
                         },
 
                         (e) -> Log.e("OBSERVABLE HERRE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
@@ -155,13 +169,48 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        Intent serviceIntent = new Intent(MainActivity.this, CookingNotificationService.class);
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        Log.d(TAG, "onStart Service created from activity");
+        startService(serviceIntent);
+        Log.d(TAG, "onStart Service start from activity");
+    }
+
+    @Override
     public void onResume() {
-        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
+//        mHandler.postDelayed(mPiQueryAtInterval, INTERVAL);
 
         super.onResume();
         if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
             mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_ADV_VIEW);
         }
+        Log.d(TAG, "onResume of Activity run");
+
+        if(cookingNotificationService != null && (querySubscription == null || querySubscription.isUnsubscribed())) {
+
+            querySubscription = createPollingSubscription();
+        }
+    }
+
+    private Subscription createPollingSubscription() {
+        return cookingNotificationService.getPollingObservable()
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(num -> Log.d(TAG, "Polling... #" + num));
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        (response) -> {
+                            currTempTV.setText(response.getTemp());
+                            currModeTV.setText(response.getMode());
+
+                            Log.d("OBSERVABLE UI", "Set temp to " + response.getTemp());
+                        },
+
+                        (e) -> Log.e("OBSERVABLE HERE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
+                        () -> Log.d("OBSERVABLE", "onComplete Called")
+                );
     }
 
     @Override
@@ -173,6 +222,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onPause();
         //prefs.unregisterOnSharedPreferenceChangeListener(listener);
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if(serviceBound) {
+            Intent stopServiceIntent = new Intent(MainActivity.this, CookingNotificationService.class);
+            stopService(stopServiceIntent);
+            unbindService(serviceConnection);
+            serviceBound = false;
+        }
+    }
+
     private void forceNewEntries() {
         List<Meal> mealList = Meal.listAll(Meal.class);
         if(mealList != null) {
@@ -324,6 +386,26 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void onSharedPreferenceChanged(SharedPreferences sf, String key) {
         Log.e("change", "pref changed");
     }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            CookingNotificationService.LocalBinder binder = (CookingNotificationService.LocalBinder) iBinder;
+            cookingNotificationService = binder.getService();
+            serviceBound = true;
+
+            querySubscription = createPollingSubscription();
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            if(querySubscription != null && !querySubscription.isUnsubscribed()) {
+                querySubscription.unsubscribe();
+            }
+            serviceBound = false;
+        }
+    };
 
 
     /**
