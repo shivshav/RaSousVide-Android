@@ -51,6 +51,8 @@ public class SettingsActivity extends PreferenceActivity  {
     public static final String KEY_PREF_PI_DOMAIN_NAME = "pi_domain_name";
     public static final String KEY_PREF_PI_IP = "pi_ip";
     public static final String KEY_PREF_PI_PORT = "pi_port";
+    public static final String KEY_PREF_PI_TEMP_REFRESH = "pi_on_refresh_rate";
+    public static final String KEY_PREF_PI_MODE_REFRESH = "pi_off_refresh_rate";
     public static final String KEY_PREF_NOTIFICATIONS_RINGTONE = "notifications_new_message_ringtone";
 
     @Override
@@ -118,6 +120,10 @@ public class SettingsActivity extends PreferenceActivity  {
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_DOMAIN_NAME));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_IP));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_PORT));
+
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_TEMP_REFRESH));
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_MODE_REFRESH));
+
 
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_RINGTONE));
 
@@ -266,12 +272,19 @@ public class SettingsActivity extends PreferenceActivity  {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
+        Object preferenceVal = null;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(preference.getContext());
+        try {
+            String myString = preferences.getString(preference.getKey(), "");
+            preferenceVal = myString;
+        } catch (ClassCastException cce) {
+            Integer myInt = preferences.getInt(preference.getKey(), 5);
+            preferenceVal = myInt;
+        }
+
         // Trigger the listener immediately with the preference's
         // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, preferenceVal);
     }
 
     /**
@@ -310,6 +323,9 @@ public class SettingsActivity extends PreferenceActivity  {
             bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_PORT));
 
             bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_DOMAIN_NAME));
+
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_TEMP_REFRESH));
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_MODE_REFRESH));
 
             setupPiSettingsFragment();
 

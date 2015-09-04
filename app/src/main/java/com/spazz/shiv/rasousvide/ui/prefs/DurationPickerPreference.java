@@ -28,12 +28,18 @@ import android.widget.NumberPicker;
 
 import com.spazz.shiv.rasousvide.R;
 
+import java.util.HashMap;
+
 /*
  * @author Danesh
  * @author nebkat
  */
 
 public class DurationPickerPreference extends DialogPreference {
+    private static final String HASHKEY_HOURS = "hours";
+    private static final String HASHKEY_MINUTES = "minutes";
+    private static final String HASHKEY_SECONDS = "seconds";
+
     private int hourMin, hourMax, minuteMin, minuteMax, secondMin, secondMax, mDefault;
 
 //    private String mMaxExternalKey, mMinExternalKey;
@@ -84,26 +90,25 @@ public class DurationPickerPreference extends DialogPreference {
 
         int time = getPersistedInt(5);
 
-        int defaultHours = time/(60*60);
-        int defaultMinutes = (time - (defaultHours * (60*60)))/60;
-        int defaultSeconds = (time - (defaultHours * (60*60)) - (defaultMinutes * 60));
+        HashMap<String, Integer> times = convertIntegerToTime(time);
 
-        hourPicker = setupPicker(view, R.id.hour_picker, hourMin, hourMax, defaultHours);
-        minutePicker = setupPicker(view, R.id.minute_picker, minuteMin, minuteMax, defaultMinutes);
-        secondPicker = setupPicker(view, R.id.second_picker, secondMin, secondMax, defaultSeconds);
+        hourPicker = setupPicker(view, R.id.hour_picker, hourMin, hourMax, times.get(HASHKEY_HOURS));
+        minutePicker = setupPicker(view, R.id.minute_picker, minuteMin, minuteMax, times.get(HASHKEY_MINUTES));
+        secondPicker = setupPicker(view, R.id.second_picker, secondMin, secondMax, times.get(HASHKEY_SECONDS));
 
         return view;
     }
 
-    private NumberPicker setupPicker(View view, int resId, int min, int max, int defaultVal) {
+    private NumberPicker setupPicker(View view, int resId, int min, int max, Integer defaultVal) {
         NumberPicker numberPicker = (NumberPicker) view.findViewById(resId);
 
         // Initialize state
         numberPicker.setMaxValue(max);
         numberPicker.setMinValue(min);
         numberPicker.setValue(defaultVal);
-        numberPicker.setWrapSelectorWheel(false);
+        numberPicker.setWrapSelectorWheel(true);
 
+        //TODO: FIgure out how to stop keyboard from coming up
 //        // No keyboard popup
 //        EditText textInput = (EditText) numberPicker.findViewById(android.R.id.);
 //
@@ -117,13 +122,68 @@ public class DurationPickerPreference extends DialogPreference {
 
     @Override
     protected void onDialogClosed(boolean positiveResult) {
+        int hours, minutes, seconds;
+
+        hours = hourPicker.getValue();
+        minutes = minutePicker.getValue();
+        seconds = secondPicker.getValue();
+
         if (positiveResult) {
             int time = 0;
-            time += (hourPicker.getValue() * 60*60);
-            time += (minutePicker.getValue() * 60);
-            time += (secondPicker.getValue());
+            time += (hours * 60*60);
+            time += (minutes * 60);
+            time += (seconds);
             persistInt(time);
         }
+
+        callChangeListener(summarizeTheTime(hours, minutes, seconds));
+    }
+
+    @Override
+    public void setSummary(CharSequence summary) {
+        int time;
+        try {
+            time = Integer.parseInt(String.valueOf(summary));
+        } catch (NumberFormatException nfe) {
+            super.setSummary(summary.toString());
+            return;
+        }
+
+        HashMap<String, Integer> times = convertIntegerToTime(time);
+
+        super.setSummary(summarizeTheTime(times.get(HASHKEY_HOURS), times.get(HASHKEY_MINUTES), times.get(HASHKEY_SECONDS)));
+    }
+
+    private HashMap<String, Integer> convertIntegerToTime(int time) {
+        int defaultHours = time/(60*60);
+        int defaultMinutes = (time - (defaultHours * (60*60)))/60;
+        int defaultSeconds = (time - (defaultHours * (60*60)) - (defaultMinutes * 60));
+
+        HashMap<String, Integer> values = new HashMap<>(3);
+        values.put(HASHKEY_HOURS, defaultHours);
+        values.put(HASHKEY_MINUTES, defaultMinutes);
+        values.put(HASHKEY_SECONDS, defaultSeconds);
+
+        return values;
+    }
+
+    private String summarizeTheTime(Integer hours, Integer minutes, Integer seconds) {
+
+        StringBuilder sb = new StringBuilder();
+        if(hours > 0) {
+            sb.append(hours).append(" hours, ");
+        }
+        if(minutes > 0) {
+            sb.append(minutes).append(" minutes, ");
+        }
+        if(seconds > 0) {
+            if(sb.length() > 0) {
+                sb.append("and ");
+            }
+            sb.append(seconds).append(" seconds");
+        }
+
+        return sb.toString();
     }
 
 }

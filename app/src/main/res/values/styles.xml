@@ -1,5 +1,5 @@
 <resources>
-
+    <!--TODO: Make the background of things that would be white a dark-ish gray to make the yellow stand out more without having the sharp contrast of black. Plus it would go well with the light blue primary :D-->
     <!-- Base application theme. -->
     <style name="AppTheme" parent="AppTheme.Base">
         <!-- Customize your theme here. -->

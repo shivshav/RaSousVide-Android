@@ -11,57 +11,70 @@
      limitations under the License.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center_horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center">
+    android:layout_height="match_parent">
 
     <NumberPicker
-        android:id="@+id/hour_picker"
-        android:layout_width="60dp"
+        android:id="@+id/minute_picker"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="8dp"/>
+        android:layout_centerInParent="true"
+        android:layout_margin="8dp"
+        android:padding="4dp"/>
+
+    <TextView
+        android:id="@+id/minute_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/minute_picker"
+        android:padding="4dp"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="Minutes"/>
+    <NumberPicker
+        android:id="@+id/hour_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/minute_picker"
+        android:layout_toLeftOf="@id/minute_picker"
+        android:layout_margin="8dp"
+        android:padding="4dp"/>
 
     <TextView
         android:id="@+id/hour_label"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/hour_picker"
-        android:padding="8dp"
+        android:layout_alignStart="@id/hour_picker"
+        android:layout_alignLeft="@id/hour_picker"
+        android:layout_alignEnd="@id/hour_picker"
+        android:layout_alignRight="@id/hour_picker"
+        android:padding="4dp"
         android:gravity="center"
         android:text="Hours"/>
-    <NumberPicker
-        android:id="@+id/minute_picker"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/hour_picker"
-        android:layout_toEndOf="@id/hour_picker"
-        android:padding="8dp"/>
-    <TextView
-        android:id="@+id/minute_label"
-        android:layout_width="60dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/minute_picker"
-        android:layout_toEndOf="@id/hour_label"
-        android:layout_toRightOf="@id/hour_label"
-        android:padding="8dp"
-        android:gravity="center"
-        android:text="Minutes"/>
 
     <NumberPicker
         android:id="@+id/second_picker"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_toRightOf="@id/minute_picker"
         android:layout_toEndOf="@id/minute_picker"
-        android:padding="8dp"/>
+        android:layout_margin="8dp"
+        android:padding="4dp"/>
     <TextView
         android:id="@+id/second_label"
-        android:layout_width="60dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/second_picker"
-        android:layout_toRightOf="@id/minute_label"
-        android:layout_toEndOf="@id/minute_label"
-        android:padding="8dp"
+        android:layout_alignStart="@id/second_picker"
+        android:layout_alignLeft="@id/second_picker"
+        android:layout_alignEnd="@id/second_picker"
+        android:layout_alignRight="@id/second_picker"
+        android:padding="4dp"
         android:gravity="center"
         android:text="Seconds"/>
 

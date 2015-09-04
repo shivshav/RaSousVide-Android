@@ -34,10 +34,16 @@
         android:maxLines="1" />
 
     <com.spazz.shiv.rasousvide.ui.prefs.DurationPickerPreference
-        android:key="pi_temp_refresh_rate"
-        android:title="Temperature Refresh Rate"
-        android:dialogMessage="Where does this go?"
-        android:dialogTitle="Is This Different?"
+        android:key="pi_on_refresh_rate"
+        android:title="Check Temperature Every..."
+        android:dialogTitle="Temperature Update Interval"
+        android:positiveButtonText="Set"
+        android:negativeButtonText="@android:string/cancel"/>
+
+    <com.spazz.shiv.rasousvide.ui.prefs.DurationPickerPreference
+        android:key="pi_off_refresh_rate"
+        android:title="Check Power Every..."
+        android:dialogTitle="Power Status Check Interval"
         android:positiveButtonText="Set"
         android:negativeButtonText="@android:string/cancel"/>
 </PreferenceScreen>
