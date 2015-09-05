@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.graphics.Outline;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -33,7 +34,8 @@ import android.view.animation.Animation;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
-import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.R;
@@ -61,15 +63,24 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Bind(R.id.toolbar_bottom)
     Toolbar bottomToolbar;
-//    @Bind(R.id.bottom_layout)
+
+    @Bind(R.id.current_mode)
+    TextView currentMode;
+//    @InjectView(R.id.bottom_layout)
 //    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
     @Bind(R.id.stop_button)
-    ImageButton stopButton;
+    FloatingActionButton stopButton;
 
     @Bind(R.id.send_button)
-    ImageButton sendButton;
+    FloatingActionButton sendButton;
+
+    @Bind(R.id.menu_button)
+    FloatingActionButton menuButton;
+
+    @Bind(R.id.test_button)
+    FloatingActionButton testButton;
 
     private TabsPagerAdapter mAdapter;
 
