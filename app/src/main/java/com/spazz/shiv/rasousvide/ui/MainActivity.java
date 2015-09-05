@@ -11,7 +11,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.renderscript.Type;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -28,6 +28,7 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.R;
@@ -36,26 +37,18 @@ import com.spazz.shiv.rasousvide.database.Meal;
 import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.spazz.shiv.rasousvide.ui.tabs.SousVideFragment;
 import com.spazz.shiv.rasousvide.CookingNotificationService;
-import com.spazz.shiv.rasousvide.rest.RestClient;
-import com.spazz.shiv.rasousvide.rest.model.ShivVideResponse;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import rx.Observable;
-import rx.Scheduler;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.android.schedulers.HandlerScheduler;
-import rx.schedulers.Schedulers;
 
-
+//TODO: Wrap all database calls into observables
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
 
@@ -85,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private Subscription querySubscription;
 
+    //TODO: Send a single query to the sous-vide in the beginning just to be able to set initial status;
+    //TODO: Setup send and stop buttons to be in correct state after we get status response back
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,8 +109,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
 //    private Subscription setupObservable() {
-//        //TODO: Have a long and short timer interval that is for 'off' and 'on' modes
-//        //TODO: Make above user configurable
+//        //TODO: Make above user configurable -> tie preference to actual interval
 //
 //        return Observable.interval(5, TimeUnit.SECONDS)
 //                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
@@ -171,9 +165,39 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                             Log.d("OBSERVABLE UI", "Set temp to " + response.getTemp());
                         },
 
-                        (e) -> Log.e("OBSERVABLE HERE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
-                        () -> Log.d("OBSERVABLE", "onComplete Called")
+                        (e) -> {
+                            Log.e("OBSERVABLE ERROR HERE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread() + "\n");
+                            e.printStackTrace();
+                            try {
+                                RetrofitError error = (RetrofitError) e;
+                                handleRetrofitError(error);
+                            } catch (ClassCastException cce) {
+                                Log.e("OBSERVABLE CLASSCASTEXC", "Not a RetrofitError");
+                            }
+                        },
+                        () -> Log.d("OBSERVABLE COMPLETE", "onComplete Called")
                 );
+    }
+
+    private void handleRetrofitError(RetrofitError error) {
+        switch (error.getKind()) {
+            case HTTP:
+                switch (error.getResponse().getStatus()) {
+                    case 401:
+                        Toast.makeText(this, "Unauthorized to access " + error.getUrl(), Toast.LENGTH_LONG).show();
+                        break;
+                    case 404:
+                        Toast.makeText(this, "Unable to find " + error.getUrl(), Toast.LENGTH_LONG).show();
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case NETWORK:
+                Toast.makeText(this, "There was a network error..." + (error.getMessage() == null? "": error.getMessage() ), Toast.LENGTH_LONG).show();
+            default:
+                break;
+        }
     }
 
     @Override
@@ -246,6 +270,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //        });
     }
 
+    //TODO: Add in the observable to send out messages to the sous-vide
     @OnClick(R.id.send_button)
     public void sendButtonClick(View v) {
 //        Intent cooking = new Intent(this, CookingNotificationService.class);
