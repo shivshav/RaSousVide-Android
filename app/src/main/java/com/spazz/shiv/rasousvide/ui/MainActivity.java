@@ -1,4 +1,4 @@
-package com.spazz.shiv.rasousvide;
+package com.spazz.shiv.rasousvide.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -6,15 +6,19 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Outline;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,56 +34,46 @@ import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
-import com.spazz.shiv.rasousvide.tabs.SousVideFragment;
+import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
+import com.spazz.shiv.rasousvide.ui.tabs.SousVideFragment;
 
-import java.util.Iterator;
 import java.util.List;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
     private static final String TAG = "MainActivity";
 
-
-    @InjectView(R.id.toolbar)
+    @Bind(R.id.toolbar)
     Toolbar toolbar;
-    @InjectView(R.id.tabs)
+    @Bind(R.id.tabs)
     PagerSlidingTabStrip tabs;
-    @InjectView(R.id.pager)
+    @Bind(R.id.pager)
     ViewPager pager;
 
-    @InjectView(R.id.toolbar_bottom)
+    @Bind(R.id.toolbar_bottom)
     Toolbar bottomToolbar;
-
-    @InjectView(R.id.current_mode)
-    TextView currentMode;
-//    @InjectView(R.id.bottom_layout)
+//    @Bind(R.id.bottom_layout)
 //    RelativeLayout bottomLayout;
 
     //TODO: This should only show when status changes from 'Off' to something else
-    @InjectView(R.id.stop_button)
+    @Bind(R.id.stop_button)
     ImageButton stopButton;
 
-    @InjectView(R.id.send_button)
+    @Bind(R.id.send_button)
     ImageButton sendButton;
 
-    @InjectView(R.id.menu_button)
-    ImageButton menuButton;
-
-    @InjectView(R.id.test_button)
-    ImageButton testButton;
-
     private TabsPagerAdapter mAdapter;
+
+    SharedPreferences prefs;
 
     private Boolean firstTime = null;
 
@@ -95,7 +89,7 @@ public class MainActivity extends ActionBarActivity {
         forceNewEntries();
         Entree.firstTimeMealSetup();
 
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         //action bar setup
         setSupportActionBar(toolbar);
@@ -110,12 +104,27 @@ public class MainActivity extends ActionBarActivity {
         setupBottomToolbar();
 //        setupStopAnimation();
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
 //        if(isFirstTime()) {
 //            //Execute database setup here
 //            Entree.firstTimeMealSetup();
 //        }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
+            mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_ADV_VIEW);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //prefs.unregisterOnSharedPreferenceChangeListener(listener);
+    }
 
 
     private void forceNewEntries() {
@@ -451,6 +460,7 @@ public class MainActivity extends ActionBarActivity {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
                 @Override
+                @TargetApi(21)
                 public void getOutline(View view, Outline outline) {
                     // Or read size directly from the view's width/height
                     int size = getResources().getDimensionPixelSize(R.dimen.round_button_diameter);
@@ -729,11 +739,19 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sf, String key) {
+        Log.e("change", "pref changed");
+    }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -741,10 +759,11 @@ public class MainActivity extends ActionBarActivity {
      */
     public class TabsPagerAdapter extends FragmentPagerAdapter {
 
-        private final String[] TAB_TITLES = getResources().getStringArray(R.array.sliding_tab_names);
-
+        private String[] tabTitles;
+        private boolean advancedView = false;
         public TabsPagerAdapter(FragmentManager fm) {
             super(fm);
+            updateTabTitles(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()), SettingsActivity.KEY_PREF_ADV_VIEW);
         }
 
         @Override
@@ -757,16 +776,35 @@ public class MainActivity extends ActionBarActivity {
                 case 1:
                     return SousVideFragment.newInstance(position + 1);
                 case 2:
-                    return SousVideFragment.newInstance(position + 1);
+                    if(advancedView) {return SousVideFragment.newInstance(position + 1);}
+                    else {return null;}
                 default: return null;
             }
         }
 
         @Override
-        public int getCount() { return TAB_TITLES.length;}
+        public int getCount() { return tabTitles.length;}
 
         @Override
-        public CharSequence getPageTitle(int position) { return TAB_TITLES[position];}
+        public CharSequence getPageTitle(int position) { return tabTitles[position];}
 
+        public void updateTabTitles(SharedPreferences sharedPref, String key) {
+            String[] basTitles = getResources().getStringArray(R.array.sliding_tab_basic_names);
+            String[] advTitles = null;
+            advancedView = sharedPref.getBoolean(key, false);
+            if(advancedView) {
+                advTitles = getResources().getStringArray(R.array.sliding_tab_advanced_names);
+            }
+            tabTitles = new String[basTitles.length + (advTitles == null ? 0:advTitles.length)];
+            System.arraycopy(basTitles, 0, tabTitles, 0, basTitles.length);
+            if (advTitles != null) {
+                System.arraycopy(advTitles, 0, tabTitles, basTitles.length, advTitles.length);
+            }
+            notifyDataSetChanged();
+        }
+
+        public boolean getAdvancedVIew() {
+            return this.advancedView;
+        }
     }
 }

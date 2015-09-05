@@ -1,8 +1,10 @@
-package com.spazz.shiv.rasousvide.tabs;
+package com.spazz.shiv.rasousvide.ui.tabs;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.util.Log;
@@ -10,20 +12,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
+import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.triggertrap.seekarc.SeekArc;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.Bind;
 import butterknife.OnItemSelected;
 
 
@@ -41,20 +44,24 @@ public class SousVideFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
 
-    @InjectView(R.id.seekArcTemp)
+    @Bind(R.id.seekArcTemp)
     SeekArc seekArcTemp;
-    @InjectView(R.id.seekTempText)
+    @Bind(R.id.seekTempText)
     TextView seekTempText;
-    @InjectView(R.id.meal_spinner)
+    @Bind(R.id.meal_spinner)
     Spinner mealSpinner;
-    @InjectView(R.id.meal_spinner_sub_choice)
+    @Bind(R.id.meal_spinner_sub_choice)
     Spinner mealSubChoice;
+    @Bind(R.id.pid_layout)
+    RelativeLayout pidLayout;
     // TODO: Rename and change types of parameters
 
     List<Entree> entrees;
 
     Meal selectedMeal;
-    private int position;
+
+    SharedPreferences prefs;
+    public boolean advView;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -81,28 +88,40 @@ public class SousVideFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            position = getArguments().getInt(ARG_POSITION);
-        }
+        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_sous_vide, container, false);
-        ButterKnife.inject(this, rootView);
+        ButterKnife.bind(this, rootView);
         ViewCompat.setElevation(rootView, 50);
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
         seekArcTemp.setProgress(0);
         //seekTempText.setText("Placeholder son!");
         setupMealSpinner();
+        advView = prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false);
+
         return rootView;
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        boolean pref = prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false);
+        if(advView != pref) {
+            if (pref) {
+                pidLayout.setVisibility(View.VISIBLE);
+            } else {
+                pidLayout.setVisibility(View.GONE);
+            }
+            advView = pref;
+        }
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.reset(this);
+        ButterKnife.unbind(this);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

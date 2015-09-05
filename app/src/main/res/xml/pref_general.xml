@@ -1,0 +1,13 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:key="advanced_switch"
+        android:title="Enable Advanced View"
+        android:switchTextOff="Basic"
+        android:switchTextOn="Advanced"
+        android:summaryOn="Advanced View"
+        android:summaryOff="Basic View"
+        android:defaultValue="false"
+        />
+
+</PreferenceScreen>
