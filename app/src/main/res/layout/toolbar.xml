@@ -5,6 +5,6 @@
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:title="@string/app_name"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    android:minHeight="?attr/actionBarSize" />
+    android:theme="@style/ShivVideToolbarTheme"
+    android:elevation="4dp"
+    app:title="@string/app_name"/>
