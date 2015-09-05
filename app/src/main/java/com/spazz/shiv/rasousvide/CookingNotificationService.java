@@ -2,13 +2,18 @@ package com.spazz.shiv.rasousvide;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.spazz.shiv.rasousvide.rest.RestClient;
 import com.spazz.shiv.rasousvide.rest.model.ShivVideResponse;
+import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -63,11 +68,21 @@ public class CookingNotificationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Toast.makeText(this, "onStartCommand()", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "onStartCommand Service run");
-        pollingObservable = createPollingObservable();
+
+        long interval = getIntervalPreference();
+
+        pollingObservable = createPollingObservable(interval);
         return START_NOT_STICKY;
     }
 
-    private Observable<ShivVideResponse> createPollingObservable() {
+    private int getIntervalPreference() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int interval = preferences.getInt(SettingsActivity.KEY_PREF_PI_TEMP_REFRESH, SettingsActivity.DEFAULT_PREF_PI_TEMP_REFRESH);
+        return interval;
+
+    }
+
+    private Observable<ShivVideResponse> createPollingObservable(long interval) {
         return Observable.interval(5, TimeUnit.SECONDS)
                 .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
                 .distinctUntilChanged();
@@ -95,7 +110,9 @@ public class CookingNotificationService extends Service {
         Toast.makeText(this, "DESTROY ALL SERVICE", Toast.LENGTH_SHORT).show();
     }
 
+    // Public API
     public Observable<ShivVideResponse> getPollingObservable() {
         return pollingObservable;
     }
+
 }

@@ -55,6 +55,10 @@ public class SettingsActivity extends PreferenceActivity  {
     public static final String KEY_PREF_PI_MODE_REFRESH = "pi_off_refresh_rate";
     public static final String KEY_PREF_NOTIFICATIONS_RINGTONE = "notifications_new_message_ringtone";
 
+    public static final int DEFAULT_PREF_PI_TEMP_REFRESH = 5;
+    public static final int DEFAULT_PREF_PI_MODE_REFRESH = 60;
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -278,7 +282,7 @@ public class SettingsActivity extends PreferenceActivity  {
             String myString = preferences.getString(preference.getKey(), "");
             preferenceVal = myString;
         } catch (ClassCastException cce) {
-            Integer myInt = preferences.getInt(preference.getKey(), 5);
+            Integer myInt = preferences.getInt(preference.getKey(), DEFAULT_PREF_PI_TEMP_REFRESH);
             preferenceVal = myInt;
         }
 
