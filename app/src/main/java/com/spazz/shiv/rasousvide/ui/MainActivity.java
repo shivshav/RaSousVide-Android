@@ -337,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         menuToggle.play(menuRotate).with(sendTranslate).with(sendAlpha).with(stopTranslate).with(stopAlpha);
 
-        Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos);
+        Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos + ", SendRotation: " + sendButton.getRotationY());
 
         menuOpen = !menuOpen;
 
@@ -438,9 +438,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     super.onAnimationEnd(animation);
                     Log.d("SendAppearEnd", "Disappearing send button...");
                     sendButton.setVisibility(View.GONE);
-                    sendButton.setRotationY(0);
-                    Log.d("SendAppearEnd", "Send button disappeared");
-
+                    Log.d("SendAppearEnd", "Send button disappeared with rotation " + sendButton.getRotationY());
                 }
             });
 
@@ -485,8 +483,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
                     sendButton.setVisibility(View.VISIBLE);
-                    sendButton.setRotationY(0);
-
                 }
             });
         }
@@ -512,6 +508,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         sendAppear.setStartDelay(fullAnimDuration/2);
 
         AnimatorSet modeChange = new AnimatorSet();
+
+        modeChange.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                sendButton.setRotationY(0);
+                Log.d("ModeChangeEnd", "Send button with rotation " + sendButton.getRotationY());
+            }
+        });
 
         if(on) {
             modeChange.play(menuFlip).with(menuAppear).with(sendFlip).with(sendAppear);
