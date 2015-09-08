@@ -4,12 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Outline;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -19,15 +16,10 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.util.Property;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewOutlineProvider;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -140,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         modeTextChangeSubscription = createModeTextChangedObservable()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::altModeChanged);
+                .subscribe(this::modeChanged);
     }
 
     @Override
@@ -215,14 +207,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         stopButton.setVisibility(View.GONE);
 
         menuOpen = false;
-
-    }
-
-    private void slideOut() {
-
-    }
-
-    private void slideIn() {
 
     }
 
@@ -384,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 );
     }
 
-    private void altModeChanged(String mode) {
+    private void modeChanged(String mode) {
         long fullAnimDuration = 500;
 
         AnimatorSet menuToggle = null;
@@ -409,24 +393,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             //flip send button to expandMenu button
             Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
 
-
             on = true;
-
-//            menuButton.setAlpha(0);
 
             menuAppearStart = 0;
             menuAppearEnd = 1;
 
             menuFlipStart = -180;
             menuFlipEnd = 0;
-
-//            menuAppear.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    super.onAnimationEnd(animation);
-//                    menuButton.setVisibility(View.VISIBLE);
-//                }
-//            });
 
             sendAppearStart = 1;
             sendAppearEnd = 0;
@@ -456,8 +429,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
 
             on = false;
-//            sendButton.setAlpha(0);
-//            sendButton.setVisibility(View.VISIBLE);
 
             menuAppearStart = 1;
             menuAppearEnd = 0;
@@ -465,13 +436,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             menuFlipStart = 0;
             menuFlipEnd = -180;
 
-//            menuAppear.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    super.onAnimationEnd(animation);
-//                    sendButton.setVisibility(View.GONE);
-//                }
-//            });
             sendAppearStart = 0;
             sendAppearEnd = 1;
 
@@ -512,6 +476,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         modeChange.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
+            // set sendButton rotation to initial only after end of whole set
                 super.onAnimationEnd(animation);
                 sendButton.setRotationY(0);
                 Log.d("ModeChangeEnd", "Send button with rotation " + sendButton.getRotationY());
@@ -533,98 +498,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         modeChange.start();
         Log.d(TAG, "On:" + on + "FlipStart:" + menuFlipStart + ", FlipEnd:" + menuFlipEnd);
-
-    }
-    private void modeChanged(String mode) {
-        long fullAnimDuration = 500;
-
-        ObjectAnimator menuFlip = ObjectAnimator.ofFloat(menuButton, "rotationY", 0);
-        ObjectAnimator menuAppear = ObjectAnimator.ofFloat(menuButton, "alpha", 0);
-        float menuAppearStart;
-        float menuAppearEnd;
-        float menuFlipStart;
-        float menuFlipEnd;
-
-        ObjectAnimator sendFlip = ObjectAnimator.ofFloat(sendButton, "rotationY", 0);
-        ObjectAnimator sendAppear = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
-        float sendAppearStart;
-        float sendAppearEnd;
-        float sendFlipStart;
-        float sendFlipEnd;
-
-        boolean on;
-
-        if("Auto".matches(mode)) {//Sous Vide was turned on to sous vide mode
-            //flip send button to expandMenu button
-            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
-
-            on = true;
-
-            menuButton.setAlpha(0);
-
-            menuAppearStart = 0;
-            menuAppearEnd = 1;
-
-            menuFlipStart = -180;
-            menuFlipEnd = 0;
-
-            sendAppearStart = 1;
-            sendAppearEnd = 0;
-
-            sendFlipStart = 0;
-            sendFlipEnd = 180;
-
-        }
-        else if("Off".matches(mode)) {//Sous Vide was turned off
-            //flip expandMenu to send
-            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
-
-            on = false;
-            sendButton.setAlpha(0);
-            sendButton.setVisibility(View.VISIBLE);
-
-            menuAppearStart = 1;
-            menuAppearEnd = 0;
-
-            menuFlipStart = 0;
-            menuFlipEnd = 180;
-
-            sendAppearStart = 0;
-            sendAppearEnd = 1;
-
-            sendFlipStart = -180;
-            sendFlipEnd = 0;
-        } else {
-            return;
-        }
-
-        menuFlip.setFloatValues(menuFlipStart, menuFlipEnd);
-        menuFlip.setDuration(fullAnimDuration);
-        menuFlip.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        menuAppear.setFloatValues(menuAppearStart, menuAppearEnd);
-        menuAppear.setDuration(1);
-        menuAppear.setStartDelay(fullAnimDuration/2);
-
-
-        sendFlip.setFloatValues(sendFlipStart, sendFlipEnd);
-        sendFlip.setDuration(fullAnimDuration);
-        sendFlip.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        sendAppear.setFloatValues(sendAppearStart, sendAppearEnd);
-        sendAppear.setDuration(1);
-        sendAppear.setStartDelay(fullAnimDuration/2);
-
-        AnimatorSet modeChange = new AnimatorSet();
-
-        if(on) {
-            modeChange.play(menuFlip).with(menuAppear).with(sendFlip).with(sendAppear);
-        }
-        else {
-            modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
-
-        }
-        modeChange.start();
 
     }
 
