@@ -12,7 +12,6 @@ import android.graphics.Outline;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -49,6 +48,11 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.android.widget.WidgetObservable;
+import rx.schedulers.Schedulers;
 
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -92,6 +96,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private float sendPos;
     private float stopPos;
 
+    private Subscription modeTextChangeSubscription;
+
+    private Observable<String> textModeObservable;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //        setupStopAnimation();
 
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        
 
 //        if(isFirstTime()) {
 //            //Execute database setup here
@@ -129,12 +138,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
             mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_ADV_VIEW);
         }
+
+
+        modeTextChangeSubscription = createModeTextChangedObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::altModeChanged);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         //prefs.unregisterOnSharedPreferenceChangeListener(listener);
+
+        if(modeTextChangeSubscription != null && !modeTextChangeSubscription.isUnsubscribed()) {
+            modeTextChangeSubscription.unsubscribe();
+        }
     }
 
 
@@ -468,35 +486,24 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
     private void setupBottomToolbar() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
-                @Override
-                @TargetApi(21)
-                public void getOutline(View view, Outline outline) {
-                    // Or read size directly from the view's width/height
-                    int size = getResources().getDimensionPixelSize(R.dimen.round_button_diameter);
-                    outline.setOval(0, 0, size, size);
-                }
-            };
-            sendButton.setOutlineProvider(viewOutlineProvider);
-        }
 
-        currentMode.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        textModeObservable = createModeTextChangedObservable();
+    }
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                altModeChanged(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+    private Observable<String> createModeTextChangedObservable() {
+        return WidgetObservable.text(currentMode)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.newThread())
+                .map(
+                        onTextChangeEvent -> {
+                            String mode = onTextChangeEvent.text().toString();
+                            if (!mode.isEmpty() || (!mode.matches("null"))) {
+                                return mode;
+                            } else {
+                                return "Off";
+                            }
+                        }
+                );
     }
 
     private void altModeChanged(String mode) {
