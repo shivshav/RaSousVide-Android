@@ -22,6 +22,7 @@ import android.util.Log;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Property;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
@@ -117,9 +118,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         pager.setAdapter(mAdapter);
         tabs.setViewPager(pager);
 
-//        final int pageMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, getResources()
-//                .getDisplayMetrics());
-//        pager.setPageMargin(pageMargin);
         setupBottomToolbar();
 //        setupStopAnimation();
 
@@ -220,126 +218,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     }
 
-    @OnClick(R.id.menu_button)
-    public void menuClicked(View view) {
-        slide().start();
-//        long animDuration = 350;
-//
-//        ObjectAnimator sendAlpha = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
-//        ObjectAnimator stopAlpha = ObjectAnimator.ofFloat(stopButton, "alpha", 0);
-//        float alphaStart;
-//        float alphaEnd;
-//
-//        ObjectAnimator sendTranslate = ObjectAnimator.ofFloat(sendButton, "translationY", 0);
-//        ObjectAnimator stopTranslate = ObjectAnimator.ofFloat(stopButton, "translationY", 0);
-//        float sendTranslation;
-//        float stopTranslation;
-//
-//        ObjectAnimator menuRotate = ObjectAnimator.ofFloat(menuButton, "rotation", 0);
-//        float rotateStart;
-//        float rotateEnd;
-//
-//        if(menuOpen) {//do close animation
-//            alphaStart = 1;
-//            alphaEnd = 0;
-//
-//            sendTranslation = sendPos;
-//            stopTranslation = stopPos;
-//
-//            rotateStart = 45;
-//            rotateEnd = 0;
-//
-//            //make buttons non existant for layout calculation & view purposes
-//            sendTranslate.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    super.onAnimationEnd(animation);
-//                    sendButton.setVisibility(View.GONE);
-//                }
-//            });
-//
-//            stopTranslate.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationStart(Animator animation) {
-//                    super.onAnimationStart(animation);
-//                    stopButton.clearAnimation();
-//                }
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    super.onAnimationEnd(animation);
-//                    stopButton.setVisibility(View.GONE);
-//                }
-//            });
-//
-//
-//
-//        }
-//        else {//do open animation
-//
-//            alphaStart = 0;
-//            alphaEnd = 1;
-//            //Items will be set to their desired position
-//            sendTranslation = 0;
-//            stopTranslation = 0;
-//
-//            rotateStart = 0;
-//            rotateEnd = 45;
-//
-//            //make buttons visible
-//            sendTranslate.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationStart(Animator animation) {
-//                    super.onAnimationStart(animation);
-//                    sendButton.setVisibility(View.VISIBLE);
-//                }
-//            });
-//            stopTranslate.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationStart(Animator animation) {
-//                    super.onAnimationStart(animation);
-//                    stopButton.setVisibility(View.VISIBLE);
-//                }
-//
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    super.onAnimationEnd(animation);
-//                    setupStopAnimation();
-//                }
-//            });
-//        }
-//        //TODO:Make alpha animations decelerate/accelerate?
-//        sendAlpha.setFloatValues(alphaStart, alphaEnd);
-//        sendAlpha.setDuration(animDuration);
-//
-//        stopAlpha.setFloatValues(alphaStart, alphaEnd);
-//        stopAlpha.setDuration(animDuration);
-//
-//        //TODO: Make translations accelerate on close and decelerate on open?
-//        sendTranslate.setFloatValues(sendTranslation);
-//        sendTranslate.setDuration(animDuration);
-//        sendTranslate.setInterpolator(new DecelerateInterpolator());
-//
-//        stopTranslate.setFloatValues(stopTranslation);
-//        stopTranslate.setDuration(animDuration);
-//        stopTranslate.setInterpolator(new DecelerateInterpolator());
-//
-//        menuRotate.setFloatValues(rotateStart, rotateEnd);
-//        menuRotate.setDuration(animDuration);
-//        menuRotate.setInterpolator(new BounceInterpolator());
-//
-//        AnimatorSet menuToggle = new AnimatorSet();
-//
-//        menuToggle.play(menuRotate).with(sendTranslate).with(sendAlpha).with(stopTranslate).with(stopAlpha);
-//        menuToggle.start();
-////        sendButton.setTranslationY(sendPos);
-//
-////        stopButton.setTranslationY(stopTranslation);
-//
-//        Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos);
-//
-//        menuOpen = !menuOpen;
-    }
-
     private void slideOut() {
 
     }
@@ -379,8 +257,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             sendTranslate.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    Log.d("SendTranslateEnd", "Disappearing send button...");
                     super.onAnimationEnd(animation);
                     sendButton.setVisibility(View.GONE);
+                    Log.d("SendTranslateEnd", "Send button disappeared");
                 }
             });
 
@@ -462,13 +342,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         menuOpen = !menuOpen;
 
         return menuToggle;
-        //menuToggle.start();
-//        sendButton.setTranslationY(sendPos);
+    }
 
-//        stopButton.setTranslationY(stopTranslation);
-
-
-
+    @OnClick(R.id.menu_button)
+    public void menuClicked(View view) {
+        slide().start();
     }
 
     @OnClick(R.id.stop_button)
@@ -553,12 +431,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             sendAppearStart = 1;
             sendAppearEnd = 0;
 
+            // At the end of the animation, make send button disappear
             sendAppear.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
+                    Log.d("SendAppearEnd", "Disappearing send button...");
                     sendButton.setVisibility(View.GONE);
                     sendButton.setRotationY(0);
+                    Log.d("SendAppearEnd", "Send button disappeared");
 
                 }
             });
@@ -637,7 +518,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         else {
             if(menuToggle != null) {
-                modeChange.play(menuToggle).before(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+                AnimatorSet flipSet = new AnimatorSet();
+                flipSet.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+                modeChange.play(menuToggle).before(flipSet);
             }
             else {
                 modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
