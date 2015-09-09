@@ -1,6 +1,8 @@
 package com.spazz.shiv.rasousvide.rest.model;
 
 
+import butterknife.Bind;
+import retrofit.http.Body;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
@@ -17,14 +19,29 @@ public interface ShivVideAPI {
     @FormUrlEncoded
     @POST("postparams/1")
     //TODO: Add object with data to send to Pi
-    void postDeliciousParams(
+    Observable<String> postDeliciousParams(
             @Field("mode") String mode,
-            @Field("setpoint") float setpoint,
-            @Field("k") float kParameter,
-            @Field("i") float iParameter,
-            @Field("d") float dParameter,
-            @Field("dutycycle") float dutyCycle,
-            @Field("cycletime") float cycleTime,
-            @Field("boilManageTemp") float boilManageTemp,
+            @Field("setpoint") double setpoint,
+            @Field("k") double kParameter,
+            @Field("i") double iParameter,
+            @Field("d") double dParameter,
+            @Field("dutycycle") double dutyCycle,
+            @Field("cycletime") double cycleTime,
+            @Field("boilManageTemp") double boilManageTemp,
             @Field("numPntsSmooth") int numSmoothPoint);
+
+    @FormUrlEncoded
+    @POST("/")
+        //TODO: Add object with data to send to Pi
+    Observable<String> postOldAPIParams(
+            @Field("mode") String mode,
+            @Field("setpoint") double setpoint,
+            @Field("k") double kParameter,
+            @Field("i") double iParameter,
+            @Field("d") double dParameter,
+            @Field("dutycycle") double dutyCycle,
+            @Field("cycletime") double cycleTime,
+            @Field("boilManageTemp") double boilManageTemp,
+            @Field("numPntsSmooth") int numSmoothPoint);
+
 }

@@ -418,6 +418,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         if(fragment != null) {
             ShivVidePost paramsToSend = fragment.getSousVideParams();
+
+            RestClient.getAPI().postOldAPIParams(
+                    paramsToSend.getMode(),
+                    paramsToSend.getSet_point(),
+                    paramsToSend.getK_param(),
+                    paramsToSend.getI_param(),
+                    paramsToSend.getD_param(),
+                    paramsToSend.getDuty_cycle(),
+                    paramsToSend.getCycle_time(),
+                    paramsToSend.getTemp(),
+                    paramsToSend.getNumPointsSmooth()
+            )
+//            RestClient.getAPI().postOldAPIParams(paramsToSend)
+                    .subscribe(retVal -> Log.d("SEND BUTTONN CLICK", "Sent params and got response " + retVal));
+
             Toast.makeText(MainActivity.this, "Found it! Set to " + paramsToSend.getMode() + " and " + paramsToSend.getSet_point(), Toast.LENGTH_SHORT).show();
         }
         else {
@@ -470,6 +485,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         return WidgetObservable.text(currModeTV)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(Schedulers.newThread())
+                .distinctUntilChanged()
                 .map(
                         onTextChangeEvent -> {
                             String mode = onTextChangeEvent.text().toString();
@@ -503,7 +519,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         boolean on;
 
-        if("Auto".matches(mode)) {//Sous Vide was turned on to sous vide mode
+        if("auto".matches(mode.toLowerCase())) {//Sous Vide was turned on to sous vide mode
             //flip send button to expandMenu button
             Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
 
@@ -533,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             sendFlipEnd = 180;
 
         }
-        else if("Off".matches(mode)) {//Sous Vide was turned off
+        else if("off".matches(mode.toLowerCase())) {//Sous Vide was turned off
             //flip expandMenu to send
             Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
 

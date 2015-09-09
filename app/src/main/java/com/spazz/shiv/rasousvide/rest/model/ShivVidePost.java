@@ -1,66 +1,69 @@
 package com.spazz.shiv.rasousvide.rest.model;
 
+import retrofit.http.Field;
+
 public class ShivVidePost {     // realworld data
-    private float cycle_time;       // 2.0
-    private float duty_cycle;       // 100.0
-    private float elapsed;          // 1.35
-    private float d_param;          // 8.0
-    private float i_param;          // 165.0
-    private float k_param;          // 44.0
+    private double cycle_time;       // 2.0
+    private double duty_cycle;       // 100.0
+    private double elapsed;          // 1.35
+    private double d_param;          // 8.0
+    private double i_param;          // 165.0
+    private double k_param;          // 44.0
     private String mode;            // auto
     private double set_point;        // 146.0
-    private float temp;             // 145.40
+    private double temp;             // 145.40
     private String tempUnits;       // "F"
+    private int numPointsSmooth;
 
     public ShivVidePost(String mode) {
         this.mode = mode;
     }
 
-    public float getCycle_time() {
+    public double getCycle_time() {
         return cycle_time;
     }
 
-    public void setCycle_time(float cycle_time) {
+    public void setCycle_time(double cycle_time) {
         this.cycle_time = cycle_time;
     }
 
-    public float getDuty_cycle() {
+    public double getDuty_cycle() {
         return duty_cycle;
     }
 
-    public void setDuty_cycle(float duty_cycle) {
+    public void setDuty_cycle(double duty_cycle) {
         this.duty_cycle = duty_cycle;
     }
 
-    public float getElapsed() {
+    public double getElapsed() {
         return elapsed;
     }
 
-    public void setElapsed(float elapsed) {
+    public void setElapsed(double elapsed) {
         this.elapsed = elapsed;
     }
 
-    public float getD_param() {
+    public double getD_param() {
         return d_param;
     }
 
-    public void setD_param(float d_param) {
+    public void setD_param(double d_param) {
         this.d_param = d_param;
     }
 
-    public float getI_param() {
+    public double getI_param() {
         return i_param;
     }
 
-    public void setI_param(float i_param) {
+    public void setI_param(double i_param) {
         this.i_param = i_param;
     }
 
-    public float getK_param() {
+    public double getK_param() {
         return k_param;
     }
 
-    public void setK_param(float k_param) {
+    public void setK_param(double k_param) {
         this.k_param = k_param;
     }
 
@@ -80,11 +83,11 @@ public class ShivVidePost {     // realworld data
         this.set_point = set_point;
     }
 
-    public String getTemp() {
-        return Float.toString(temp);
+    public double getTemp() {
+        return temp;
     }
 
-    public void setTemp(float temp) {
+    public void setTemp(double temp) {
         this.temp = temp;
     }
 
@@ -94,5 +97,13 @@ public class ShivVidePost {     // realworld data
 
     public void setTempUnits(String tempUnits) {
         this.tempUnits = tempUnits;
+    }
+
+    public int getNumPointsSmooth() {
+        return numPointsSmooth;
+    }
+
+    public void setNumPointsSmooth(int numPointsSmooth) {
+        this.numPointsSmooth = numPointsSmooth;
     }
 }
