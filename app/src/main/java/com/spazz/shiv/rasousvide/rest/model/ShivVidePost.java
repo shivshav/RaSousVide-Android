@@ -1,21 +1,30 @@
 package com.spazz.shiv.rasousvide.rest.model;
 
-import retrofit.http.Field;
-
 public class ShivVidePost {     // realworld data
     private double cycle_time;       // 2.0
     private double duty_cycle;       // 100.0
-    private double elapsed;          // 1.35
     private double d_param;          // 8.0
     private double i_param;          // 165.0
     private double k_param;          // 44.0
-    private String mode;            // auto
+    private String mode;             // auto
     private double set_point;        // 146.0
-    private double temp;             // 145.40
-    private String tempUnits;       // "F"
+    private double boilManageTemp;   // 145.40
     private int numPointsSmooth;
 
+    public ShivVidePost() {
+        this.mode = "Off";
+        this.set_point = 146.0;
+        this.k_param = 44.0;
+        this.i_param = 165.0;
+        this.d_param = 8.0;
+        this.boilManageTemp = 145.40;
+        this.cycle_time = 2.0;
+        this.duty_cycle = 100.0;
+        this.numPointsSmooth = 5;
+    }
+
     public ShivVidePost(String mode) {
+        super();
         this.mode = mode;
     }
 
@@ -33,14 +42,6 @@ public class ShivVidePost {     // realworld data
 
     public void setDuty_cycle(double duty_cycle) {
         this.duty_cycle = duty_cycle;
-    }
-
-    public double getElapsed() {
-        return elapsed;
-    }
-
-    public void setElapsed(double elapsed) {
-        this.elapsed = elapsed;
     }
 
     public double getD_param() {
@@ -83,20 +84,12 @@ public class ShivVidePost {     // realworld data
         this.set_point = set_point;
     }
 
-    public double getTemp() {
-        return temp;
+    public double getBoilManageTemp() {
+        return boilManageTemp;
     }
 
-    public void setTemp(double temp) {
-        this.temp = temp;
-    }
-
-    public String getTempUnits() {
-        return tempUnits;
-    }
-
-    public void setTempUnits(String tempUnits) {
-        this.tempUnits = tempUnits;
+    public void setBoilManageTemp(double boilManageTemp) {
+        this.boilManageTemp = boilManageTemp;
     }
 
     public int getNumPointsSmooth() {

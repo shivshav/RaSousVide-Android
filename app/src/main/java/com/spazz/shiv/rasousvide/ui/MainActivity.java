@@ -427,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     paramsToSend.getD_param(),
                     paramsToSend.getDuty_cycle(),
                     paramsToSend.getCycle_time(),
-                    paramsToSend.getTemp(),
+                    paramsToSend.getBoilManageTemp(),
                     paramsToSend.getNumPointsSmooth()
             )
 //            RestClient.getAPI().postOldAPIParams(paramsToSend)
@@ -452,7 +452,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 //            @Override
 //            public void success(ShivVideResponse shivVideResponse, Response response) {
 //                Log.e("SEND CALLBACK", "Status: " + response.getStatus());
-//                Log.e("SEND CALLBACK", "Temp: " + shivVideResponse.getTemp());
+//                Log.e("SEND CALLBACK", "Temp: " + shivVideResponse.getBoilManageTemp());
 //            }
 //
 //            @Override

@@ -173,7 +173,7 @@ public class SousVideFragment extends Fragment {
             if(meals != null) {
                 selectedMeal = meals.get(0);
                 Log.d(TAG, "Selected meal has no name with setpoint " + meals.get(0).getSetPoint());
-                sousVideParams.setSet_point(meals.get(0).getSetPoint());
+                seekArcTemp.setProgress((int) meals.get(0).getSetPoint());
             }
         }
     }
@@ -182,7 +182,7 @@ public class SousVideFragment extends Fragment {
     void mealSelected(int position) {
         selectedMeal = entrees.get(mealSpinner.getSelectedItemPosition()).getMeals().get(position);
         Log.d(TAG, "Selected Meal is " + selectedMeal.getMealType());
-        sousVideParams.setSet_point(selectedMeal.getSetPoint());
+        seekArcTemp.setProgress((int) selectedMeal.getSetPoint());
     }
 
 
@@ -217,6 +217,7 @@ public class SousVideFragment extends Fragment {
         public void onProgressChanged(SeekArc seekArc, int progress,
                                       boolean fromUser) {
             seekTempText.setText(String.valueOf(progress));
+            sousVideParams.setSet_point(progress);
         }
     }
 

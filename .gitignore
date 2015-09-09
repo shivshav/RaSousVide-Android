@@ -27,7 +27,7 @@ proguard/
 *.log
 
 /seekarc
-# Android Studio Navigation editor temp files
+# Android Studio Navigation editor boilManageTemp files
 .navigation/
 ### Linux template
 *~
