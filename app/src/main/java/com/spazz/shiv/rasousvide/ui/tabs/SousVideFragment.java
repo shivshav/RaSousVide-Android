@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
+import com.spazz.shiv.rasousvide.rest.model.ShivVidePost;
 import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.triggertrap.seekarc.SeekArc;
 
@@ -63,7 +64,8 @@ public class SousVideFragment extends Fragment {
     SharedPreferences prefs;
     public boolean advView;
 
-//    private OnFragmentInteractionListener mListener;
+    private OnFragmentInteractionListener mListener;
+    private ShivVidePost sousVideParams;
 
     /**
      * Use this factory method to create a new instance of
@@ -89,6 +91,7 @@ public class SousVideFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sousVideParams = new ShivVidePost("Auto");
     }
 
     @Override
@@ -146,6 +149,10 @@ public class SousVideFragment extends Fragment {
 
     }
 
+    public ShivVidePost getSousVideParams() {
+        return sousVideParams;
+    }
+
     @OnItemSelected(value = R.id.meal_spinner, callback = OnItemSelected.Callback.ITEM_SELECTED)
     void entreeSelected(int position) {
         List<Meal> meals = entrees.get(position).getMeals();
@@ -166,6 +173,7 @@ public class SousVideFragment extends Fragment {
             if(meals != null) {
                 selectedMeal = meals.get(0);
                 Log.d(TAG, "Selected meal has no name with setpoint " + meals.get(0).getSetPoint());
+                sousVideParams.setSet_point(meals.get(0).getSetPoint());
             }
         }
     }
@@ -174,6 +182,7 @@ public class SousVideFragment extends Fragment {
     void mealSelected(int position) {
         selectedMeal = entrees.get(mealSpinner.getSelectedItemPosition()).getMeals().get(position);
         Log.d(TAG, "Selected Meal is " + selectedMeal.getMealType());
+        sousVideParams.setSet_point(selectedMeal.getSetPoint());
     }
 
 
@@ -221,10 +230,10 @@ public class SousVideFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        public void onFragmentInteraction(Uri uri);
-//    }
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        public void onFragmentInteraction(Uri uri);
+    }
 
 
 }

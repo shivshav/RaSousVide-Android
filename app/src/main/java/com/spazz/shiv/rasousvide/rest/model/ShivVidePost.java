@@ -8,9 +8,13 @@ public class ShivVidePost {     // realworld data
     private float i_param;          // 165.0
     private float k_param;          // 44.0
     private String mode;            // auto
-    private float set_point;        // 146.0
+    private double set_point;        // 146.0
     private float temp;             // 145.40
     private String tempUnits;       // "F"
+
+    public ShivVidePost(String mode) {
+        this.mode = mode;
+    }
 
     public float getCycle_time() {
         return cycle_time;
@@ -68,11 +72,11 @@ public class ShivVidePost {     // realworld data
         this.mode = mode;
     }
 
-    public float getSet_point() {
+    public double getSet_point() {
         return set_point;
     }
 
-    public void setSet_point(float set_point) {
+    public void setSet_point(double set_point) {
         this.set_point = set_point;
     }
 

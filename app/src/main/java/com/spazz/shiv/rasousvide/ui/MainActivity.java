@@ -4,17 +4,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.Outline;
-import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
-import android.renderscript.Type;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -38,6 +36,8 @@ import com.astuetz.PagerSlidingTabStrip;
 import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.database.Entree;
 import com.spazz.shiv.rasousvide.database.Meal;
+import com.spazz.shiv.rasousvide.rest.RestClient;
+import com.spazz.shiv.rasousvide.rest.model.ShivVidePost;
 import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.spazz.shiv.rasousvide.ui.tabs.SousVideFragment;
 import com.spazz.shiv.rasousvide.CookingNotificationService;
@@ -48,12 +48,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import retrofit.RetrofitError;
-import retrofit.client.Response;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.android.widget.WidgetObservable;
 import rx.schedulers.Schedulers;
 
@@ -121,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setupBottomToolbar();
 //        setupStopAnimation();
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
         
 
 //        if(isFirstTime()) {
@@ -415,6 +412,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     //TODO: Add in the observable to send out messages to the sous-vide
     @OnClick(R.id.send_button)
     public void sendButtonClick(View v) {
+
+
+        SousVideFragment fragment = (SousVideFragment) mAdapter.findFragmentByPosition(0);
+
+        if(fragment != null) {
+            ShivVidePost paramsToSend = fragment.getSousVideParams();
+            Toast.makeText(MainActivity.this, "Found it! Set to " + paramsToSend.getMode() + " and " + paramsToSend.getSet_point(), Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(MainActivity.this, "No go...", Toast.LENGTH_SHORT).show();
+        }
+
+//        RestClient.getAPI().postDeliciousParams();
 //        Intent cooking = new Intent(this, CookingNotificationService.class);
 //       if(!serviceRunning) {
 //           startService(cooking);
@@ -444,11 +454,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @OnClick(R.id.test_button)
     public void testClicked(View view) {
-        if("Auto".matches(currentMode.getText().toString())) {
-            currentMode.setText("Off");
+        if("Auto".matches(currModeTV.getText().toString())) {
+            currModeTV.setText("Off");
         }
-        else if("Off".matches(currentMode.getText().toString())) {
-            currentMode.setText("Auto");
+        else if("Off".matches(currModeTV.getText().toString())) {
+            currModeTV.setText("Auto");
         }
     }
     private void setupBottomToolbar() {
@@ -457,7 +467,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     private Observable<String> createModeTextChangedObservable() {
-        return WidgetObservable.text(currentMode)
+        return WidgetObservable.text(currModeTV)
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .observeOn(Schedulers.newThread())
                 .map(
@@ -669,10 +679,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             updateTabTitles(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()), SettingsActivity.KEY_PREF_ADV_VIEW);
         }
 
+        private String makeFragmentName(int viewPagerId, int index) {
+            return "android:switcher:" + viewPagerId + ":" + index;
+        }
+
+        public Fragment findFragmentByPosition(int position) {
+            return getSupportFragmentManager().findFragmentByTag(makeFragmentName(pager.getId(), position));
+        }
+
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             switch(position) {
                 case 0:
                     return SousVideFragment.newInstance(position + 1);
