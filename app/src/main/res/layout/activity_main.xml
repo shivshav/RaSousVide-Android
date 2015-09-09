@@ -38,41 +38,74 @@
         android:layout_height="match_parent"
         android:layout_below="@id/tabs"
         android:layout_above="@id/toolbar_bottom"
-        tools:context="com.spazz.shiv.rasousvide.ui.MainActivity" />
+        tools:context="com.spazz.shiv.rasousvide.MainActivity" />
 
-    <ImageButton
-        android:id="@+id/send_button"
-        android:layout_width="@dimen/round_button_diameter"
-        android:layout_height="@dimen/round_button_diameter"
-        android:layout_gravity="end"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/test_button"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_above="@id/toolbar_bottom"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="@dimen/add_button_margin"
+        android:layout_marginLeft="@dimen/add_button_margin"
+        android:tint="@color/color_accent"
+        android:src="@drawable/ic_add_black_24dp"
+        android:scaleType="center"
+        app:backgroundTint="@color/button_material_light"
+        app:elevation="@dimen/elevation_normal"
+        app:pressedTranslationZ="@dimen/elevation_raised"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/menu_button"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:layout_above="@id/toolbar_bottom"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="-28dp"
         android:layout_marginEnd="@dimen/add_button_margin"
         android:layout_marginRight="@dimen/add_button_margin"
-        android:tint="@color/color_accent"
-        android:stateListAnimator="@anim/button_ripple"
-        android:background="@drawable/oval_ripple"
-        android:elevation="@dimen/elevation_high"
-        android:src="@drawable/ic_send"
-        android:contentDescription="The button that causes the app to send a request to the raspberry pi"/>
-    <ImageButton
+        android:src="@drawable/ic_add_black_24dp"
+        android:tint="#a5a5a5"
+        app:elevation="@dimen/elevation_high"
+        app:pressedTranslationZ="8dp"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/send_button"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_above="@id/menu_button"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="@dimen/add_button_margin"
+        android:layout_marginRight="@dimen/add_button_margin"
+        android:src="@drawable/ic_send_black_24dp"
+        android:tint="?attr/colorAccent"
+        app:backgroundTint="@color/button_material_light"
+        app:elevation="@dimen/elevation_normal"
+        app:pressedTranslationZ="@dimen/elevation_raised"/>
+
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/stop_button"
-        android:layout_width="@dimen/round_button_diameter"
-        android:layout_height="@dimen/round_button_diameter"
-        android:layout_gravity="end"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:layout_above="@id/send_button"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:layout_marginEnd="@dimen/add_button_margin"
         android:layout_marginRight="@dimen/add_button_margin"
         android:tint="@color/DebugRed"
-        android:stateListAnimator="@anim/button_ripple"
-        android:background="@drawable/oval_ripple"
-        android:elevation="@dimen/elevation_high"
-        android:src="@drawable/ic_stop"
-        android:contentDescription="The button that causes the app to send a request to the raspberry pi"/>
+        android:src="@drawable/ic_power_settings_new_black_24dp"
+        android:scaleType="center"
+        app:backgroundTint="@color/button_material_light"
+        app:elevation="@dimen/elevation_normal"
+        app:pressedTranslationZ="@dimen/elevation_raised"/>
 
 </RelativeLayout>

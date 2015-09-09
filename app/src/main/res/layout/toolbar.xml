@@ -3,10 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/toolbar"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-    app:title="@string/app_name"
-    android:background="@color/color_primary"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?attr/actionBarSize" />
+    android:theme="@style/ShivVideToolbarTheme"
+    android:elevation="4dp"
+    app:title="@string/app_name"/>

@@ -13,10 +13,61 @@
         <item name="colorControlActivated">@color/DebugPink</item>
         <item name="colorControlNormal">@color/DebugGreen</item>
         <!--<item name="android:textColorPrimary">@android:color/primary_text_dark</item>-->
+        <!--<item name="colorControlNormal">@color/primary_material_light</item>-->
+        <!--<item name="colorControlActivated">?attr/colorAccent</item>-->
+        <!--<item name="colorControlHighlight">@color/secondary_text_default_material_dark</item>-->
+        <!--<item name="colorSwitchThumbNormal">@color/accent_material_light</item>-->
+
+        <!--<item name="android:textColorPrimary">@color/primary_text_default_material_dark</item>-->
+        <item name="android:textColorPrimaryInverse">@color/primary_material_dark</item>
+        <!--<item name="android:textColorSecondary">@color/DebugRed</item>-->
+
         <item name="seekArcStyle">@style/SeekArcLight</item>
+
+        <item name="toolbarStyle">@style/ShivVideToolbar</item>
 
     </style>
 
+    <style name="ShivVideToolbar" parent="Widget.AppCompat.Toolbar">
+        <!--<item name="popupTheme">@style/ThemeOverlay.AppCompat</item>-->
+        <item name="theme">@style/ShivVideToolbarTheme</item>
+        <item name="android:minHeight">?attr/actionBarSize</item>
+        <!--<item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>-->
+        <!--<item name="theme">@style/Theme.AppCompat.Light</item>-->
+        <item name="android:background">?attr/colorPrimary</item>
+        <!--app:popupTheme="@style/"-->
+        <!--<item name="displayOptions">homeAsUp|showTitle</item>-->
+        <!--<item name="title">@string/app_name</item>-->
+
+        <!--&lt;!&ndash; android:textColorPrimary is the  color of the title text-->
+     <!--in the Toolbar, in the Theme.AppCompat theme:  &ndash;&gt;-->
+        <!--<item name="android:textColorPrimary">@color/actionbar_title_text</item>-->
+
+
+        <!--&lt;!&ndash; android:actionMenuTextColor is the color of the text of-->
+              <!--action (menu) items in the Toolbar, at least in the-->
+              <!--Theme.AppCompat theme.-->
+              <!--For some reason, they already get the textColorPrimary-->
+              <!--when running on API 21, but not on older versions of-->
+              <!--Android, so this is only necessary to support older-->
+              <!--Android versions.&ndash;&gt;-->
+        <!--&lt;!&ndash;<item name="actionMenuTextColor">@color/abc_primary_text_material_light</item>&ndash;&gt;-->
+        <!--&lt;!&ndash;android:textColorSecondary is the color of the menu overflow icon (three vertical dots) &ndash;&gt;-->
+        <!--<item name="android:textColorSecondary">@color/DebugGreen</item>-->
+        <!--&lt;!&ndash; This would set the toolbar's background color,-->
+              <!--but setting this also changes the popup menu's background,-->
+              <!--even if we define popupTheme for our <Toolbar> &ndash;&gt;-->
+        <!--&lt;!&ndash;<item name="android:background">@color/color_primary</item>&ndash;&gt;-->
+        <!--<item name="titleTextAppearance">@style/TextAppearance.AppCompat.Widget.ActionBar.Title</item>-->
+
+        <!--<item name="subtitleTextAppearance">@style/TextAppearance.AppCompat.Subhead.Inverse</item>-->
+
+    </style>
+    
+    <style name="ShivVideToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!--<item name="android:textColorPrimary">@color/primary_material_light</item>-->
+        <!--<item name="titleTextAppearance">@style/TextAppearance.AppCompat.Widget.ActionBar.Title.Inverse</item>-->
+    </style>
     <!--<style name="SpinnerItem" parent="android:Spinner">-->
         <!--<item name="android:textAppearance">@android:style/Widget.TextView.SpinnerItem</item>-->
     <!--</style>-->

@@ -1,7 +1,9 @@
 package com.spazz.shiv.rasousvide.ui;
 
-import android.annotation.TargetApi;
-import android.content.ComponentName;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -10,6 +12,7 @@ import android.graphics.Outline;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.os.Bundle;
 import android.renderscript.Type;
 import android.support.v4.app.Fragment;
@@ -22,11 +25,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewOutlineProvider;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +51,11 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.android.widget.WidgetObservable;
+import rx.schedulers.Schedulers;
 
 //TODO: Wrap all database calls into observables
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -59,19 +68,31 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Bind(R.id.toolbar_bottom) Toolbar bottomToolbar;
 
     //TODO: This should only show when status changes from 'Off' to something else
-    @Bind(R.id.stop_button) ImageButton stopButton;
+    @Bind(R.id.stop_button) FloatingActionButton stopButton;
+    
+    @Bind(R.id.send_button) FloatingActionButton sendButton;
+    
+    @Bind(R.id.menu_button) FloatingActionButton menuButton;
 
-    @Bind(R.id.send_button) ImageButton sendButton;
-
+    @Bind(R.id.test_button) FloatingActionButton testButton;
     @Bind(R.id.current_mode) TextView currModeTV;
 
     @Bind(R.id.current_temp) TextView currTempTV;
     @Bind(R.id.current_temp_units) TextView currTempUnitsTV;
+
     private TabsPagerAdapter mAdapter;
 
     SharedPreferences prefs;
 
     private Boolean firstTime = null;
+
+    private boolean menuOpen;
+    private float sendPos;
+    private float stopPos;
+
+    private Subscription modeTextChangeSubscription;
+
+    private Observable<String> textModeObservable;
 
     private boolean serviceBound;
     private CookingNotificationService cookingNotificationService;
@@ -98,36 +119,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         tabs.setViewPager(pager);
 
         setupBottomToolbar();
-        setupStopAnimation();
+//        setupStopAnimation();
 
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        
 
 //        if(isFirstTime()) {
 //            //Execute database setup here
 //            Entree.firstTimeMealSetup();
 //        }
     }
-
-//    private Subscription setupObservable() {
-//        //TODO: Make above user configurable -> tie preference to actual interval
-//
-//        return Observable.interval(5, TimeUnit.SECONDS)
-//                .flatMap((num) -> RestClient.getAPI().getCurrentPiParams())
-//                .distinct()
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(
-//                        (response) -> {
-//                            currTempTV.setText(response.getTemp());
-//                            currModeTV.setText(response.getMode());
-//
-//                            Log.d("OBSERVABLE UI", "Set temp to " + response.getTemp());
-//                        },
-//
-//                        (e) -> Log.e("OBSERVABLE HERRE", e.getMessage() + "\nCurrent thread: " + Thread.currentThread()),
-//                        () -> Log.d("OBSERVABLE", "onComplete Called")
-//                );
-//
-//    }
 
     @Override
     public void onStart() {
@@ -142,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onResume() {
-
         super.onResume();
         if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
             mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_ADV_VIEW);
@@ -152,6 +152,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if(cookingNotificationService != null && (querySubscription == null || querySubscription.isUnsubscribed())) {
             querySubscription = createPollingSubscription();
         }
+
+
+        modeTextChangeSubscription = createModeTextChangedObservable()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::modeChanged);
     }
 
     private Subscription createPollingSubscription() {
@@ -207,6 +212,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         super.onPause();
         //prefs.unregisterOnSharedPreferenceChangeListener(listener);
+
+        if(modeTextChangeSubscription != null && !modeTextChangeSubscription.isUnsubscribed()) {
+            modeTextChangeSubscription.unsubscribe();
+        }
     }
 
     @Override
@@ -261,13 +270,146 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
         stopButton.startAnimation(animation);
 
+    }
 
-//        stopButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(final View view) {
-//                view.clearAnimation();
-//            }
-//        });
+    private void initMenu() {
+
+        sendPos = menuButton.getBottom() - sendButton.getBottom();
+        stopPos = menuButton.getBottom() - stopButton.getBottom();
+
+        sendButton.setTranslationY(sendPos);
+//        sendButton.setVisibility(View.GONE);
+
+        menuButton.setAlpha(0.0f);
+
+        stopButton.setTranslationY(stopPos);
+        stopButton.setVisibility(View.GONE);
+
+        menuOpen = false;
+
+    }
+
+    private AnimatorSet slide() {
+        long animDuration = 350;
+
+        ObjectAnimator sendAlpha = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
+        ObjectAnimator stopAlpha = ObjectAnimator.ofFloat(stopButton, "alpha", 0);
+        float alphaStart;
+        float alphaEnd;
+
+        ObjectAnimator sendTranslate = ObjectAnimator.ofFloat(sendButton, "translationY", 0);
+        ObjectAnimator stopTranslate = ObjectAnimator.ofFloat(stopButton, "translationY", 0);
+        float sendTranslation;
+        float stopTranslation;
+
+        ObjectAnimator menuRotate = ObjectAnimator.ofFloat(menuButton, "rotation", 0);
+        float rotateStart;
+        float rotateEnd;
+
+        if(menuOpen) {//do close animation
+            alphaStart = 1;
+            alphaEnd = 0;
+
+            sendTranslation = sendPos;
+            stopTranslation = stopPos;
+
+            rotateStart = 45;
+            rotateEnd = 0;
+
+            //make buttons non existant for layout calculation & view purposes
+            sendTranslate.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    Log.d("SendTranslateEnd", "Disappearing send button...");
+                    super.onAnimationEnd(animation);
+                    sendButton.setVisibility(View.GONE);
+                    Log.d("SendTranslateEnd", "Send button disappeared");
+                }
+            });
+
+            stopTranslate.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    stopButton.clearAnimation();
+                }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    stopButton.setVisibility(View.GONE);
+                }
+            });
+
+
+
+        }
+        else {//do open animation
+
+            alphaStart = 0;
+            alphaEnd = 1;
+            //Items will be set to their desired position
+            sendTranslation = 0;
+            stopTranslation = 0;
+
+            rotateStart = 0;
+            rotateEnd = 45;
+
+            //make buttons visible
+            sendTranslate.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    sendButton.setVisibility(View.VISIBLE);
+                }
+            });
+            stopTranslate.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    super.onAnimationStart(animation);
+                    stopButton.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    setupStopAnimation();
+                }
+            });
+        }
+        //TODO:Make alpha animations decelerate/accelerate?
+        sendAlpha.setFloatValues(alphaStart, alphaEnd);
+        sendAlpha.setDuration(animDuration);
+
+        stopAlpha.setFloatValues(alphaStart, alphaEnd);
+        stopAlpha.setDuration(animDuration);
+
+        //TODO: Make translations accelerate on close and decelerate on open?
+        sendTranslate.setFloatValues(sendTranslation);
+        sendTranslate.setDuration(animDuration);
+        sendTranslate.setInterpolator(new DecelerateInterpolator());
+
+        stopTranslate.setFloatValues(stopTranslation);
+        stopTranslate.setDuration(animDuration);
+        stopTranslate.setInterpolator(new DecelerateInterpolator());
+
+        menuRotate.setFloatValues(rotateStart, rotateEnd);
+        menuRotate.setDuration(animDuration);
+        menuRotate.setInterpolator(new BounceInterpolator());
+
+        AnimatorSet menuToggle = new AnimatorSet();
+
+        menuToggle.play(menuRotate).with(sendTranslate).with(sendAlpha).with(stopTranslate).with(stopAlpha);
+
+        Log.d(TAG, "MenuOpen?:" + menuOpen + ", StopPos:" + stopPos + ", SendPos:" + sendPos + ", SendRotation: " + sendButton.getRotationY());
+
+        menuOpen = !menuOpen;
+
+        return menuToggle;
+    }
+
+    @OnClick(R.id.menu_button)
+    public void menuClicked(View view) {
+        slide().start();
     }
 
     //TODO: Add in the observable to send out messages to the sous-vide
@@ -299,25 +441,175 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void stopClicked(View view) {
         view.clearAnimation();
     }
-    private void setupBottomToolbar() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ViewOutlineProvider viewOutlineProvider = new ViewOutlineProvider() {
-                @Override
-                @TargetApi(21)
-                public void getOutline(View view, Outline outline) {
-                    // Or read size directly from the view's width/height
-                    int size = getResources().getDimensionPixelSize(R.dimen.round_button_diameter);
-                    outline.setOval(0, 0, size, size);
-                }
-            };
-            sendButton.setOutlineProvider(viewOutlineProvider);
+
+    @OnClick(R.id.test_button)
+    public void testClicked(View view) {
+        if("Auto".matches(currentMode.getText().toString())) {
+            currentMode.setText("Off");
         }
+        else if("Off".matches(currentMode.getText().toString())) {
+            currentMode.setText("Auto");
+        }
+    }
+    private void setupBottomToolbar() {
+
+        textModeObservable = createModeTextChangedObservable();
+    }
+
+    private Observable<String> createModeTextChangedObservable() {
+        return WidgetObservable.text(currentMode)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.newThread())
+                .map(
+                        onTextChangeEvent -> {
+                            String mode = onTextChangeEvent.text().toString();
+                            if (!mode.isEmpty() || (!mode.matches("null"))) {
+                                return mode;
+                            } else {
+                                return "Off";
+                            }
+                        }
+                );
+    }
+
+    private void modeChanged(String mode) {
+        long fullAnimDuration = 500;
+
+        AnimatorSet menuToggle = null;
+
+        ObjectAnimator menuFlip = ObjectAnimator.ofFloat(menuButton, "rotationY", 0);
+        ObjectAnimator menuAppear = ObjectAnimator.ofFloat(menuButton, "alpha", 0);
+        float menuAppearStart;
+        float menuAppearEnd;
+        float menuFlipStart;
+        float menuFlipEnd;
+
+        ObjectAnimator sendFlip = ObjectAnimator.ofFloat(sendButton, "rotationY", 0);
+        final ObjectAnimator sendAppear = ObjectAnimator.ofFloat(sendButton, "alpha", 0);
+        float sendAppearStart;
+        float sendAppearEnd;
+        float sendFlipStart;
+        float sendFlipEnd;
+
+        boolean on;
+
+        if("Auto".matches(mode)) {//Sous Vide was turned on to sous vide mode
+            //flip send button to expandMenu button
+            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
+            on = true;
+
+            menuAppearStart = 0;
+            menuAppearEnd = 1;
+
+            menuFlipStart = -180;
+            menuFlipEnd = 0;
+
+            sendAppearStart = 1;
+            sendAppearEnd = 0;
+
+            // At the end of the animation, make send button disappear
+            sendAppear.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    Log.d("SendAppearEnd", "Disappearing send button...");
+                    sendButton.setVisibility(View.GONE);
+                    Log.d("SendAppearEnd", "Send button disappeared with rotation " + sendButton.getRotationY());
+                }
+            });
+
+            sendFlipStart = 0;
+            sendFlipEnd = 180;
+
+        }
+        else if("Off".matches(mode)) {//Sous Vide was turned off
+            //flip expandMenu to send
+            Toast.makeText(this, "Current Mode:" + mode, Toast.LENGTH_SHORT).show();
+
+            if(menuOpen) {
+                menuToggle = slide();
+                Log.d(TAG, "MADE IT HERE!!!");
+            }
+
+            on = false;
+
+            menuAppearStart = 1;
+            menuAppearEnd = 0;
+
+            menuFlipStart = 0;
+            menuFlipEnd = -180;
+
+            sendAppearStart = 0;
+            sendAppearEnd = 1;
+
+            sendFlipStart = 180;
+            sendFlipEnd = 0;
+
+            sendAppear.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    sendButton.setVisibility(View.VISIBLE);
+                }
+            });
+        }
+        else {
+            return;
+        }
+
+        menuFlip.setFloatValues(menuFlipStart, menuFlipEnd);
+        menuFlip.setDuration(fullAnimDuration);
+        menuFlip.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        menuAppear.setFloatValues(menuAppearStart, menuAppearEnd);
+        menuAppear.setDuration(1);
+        menuAppear.setStartDelay(fullAnimDuration/2);
+
+
+        sendFlip.setFloatValues(sendFlipStart, sendFlipEnd);
+        sendFlip.setDuration(fullAnimDuration);
+        sendFlip.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        sendAppear.setFloatValues(sendAppearStart, sendAppearEnd);
+        sendAppear.setDuration(1);
+        sendAppear.setStartDelay(fullAnimDuration/2);
+
+        AnimatorSet modeChange = new AnimatorSet();
+
+        modeChange.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+            // set sendButton rotation to initial only after end of whole set
+                super.onAnimationEnd(animation);
+                sendButton.setRotationY(0);
+                Log.d("ModeChangeEnd", "Send button with rotation " + sendButton.getRotationY());
+            }
+        });
+
+        if(on) {
+            modeChange.play(menuFlip).with(menuAppear).with(sendFlip).with(sendAppear);
+        }
+        else {
+            if(menuToggle != null) {
+                AnimatorSet flipSet = new AnimatorSet();
+                flipSet.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+                modeChange.play(menuToggle).before(flipSet);
+            }
+            else {
+                modeChange.play(sendFlip).with(sendAppear).with(menuFlip).with(menuAppear);
+            }
+        }
+        modeChange.start();
+        Log.d(TAG, "On:" + on + "FlipStart:" + menuFlipStart + ", FlipEnd:" + menuFlipEnd);
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        initMenu();
         return true;
     }
 
