@@ -184,13 +184,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         animation.setRepeatMode(Animation.REVERSE); // Reverse animation at the end so the button will fade back in
         stopButton.startAnimation(animation);
 
-
-//        stopButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(final View view) {
-//                view.clearAnimation();
-//            }
-//        });
     }
 
     private void initMenu() {
