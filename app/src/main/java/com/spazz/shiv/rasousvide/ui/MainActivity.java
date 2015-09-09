@@ -413,8 +413,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @OnClick(R.id.send_button)
     public void sendButtonClick(View v) {
 
+        SousVideFragment fragment;
 
-        SousVideFragment fragment = (SousVideFragment) mAdapter.findFragmentByPosition(0);
+        try {
+            fragment = (SousVideFragment) mAdapter.findFragmentByPosition(pager.getCurrentItem());
+        } catch (ClassCastException cce) {
+            fragment = null;
+        }
 
         if(fragment != null) {
             ShivVidePost paramsToSend = fragment.getSousVideParams();

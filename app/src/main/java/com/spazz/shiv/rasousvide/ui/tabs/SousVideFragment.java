@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -29,6 +30,10 @@ import java.util.List;
 import butterknife.ButterKnife;
 import butterknife.Bind;
 import butterknife.OnItemSelected;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.android.widget.WidgetObservable;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -45,16 +50,15 @@ public class SousVideFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_POSITION = "position";
 
-    @Bind(R.id.seekArcTemp)
-    SeekArc seekArcTemp;
-    @Bind(R.id.seekTempText)
-    TextView seekTempText;
-    @Bind(R.id.meal_spinner)
-    Spinner mealSpinner;
-    @Bind(R.id.meal_spinner_sub_choice)
-    Spinner mealSubChoice;
-    @Bind(R.id.pid_layout)
-    RelativeLayout pidLayout;
+    @Bind(R.id.seekArcTemp) SeekArc seekArcTemp;
+    @Bind(R.id.seekTempText) TextView seekTempText;
+    @Bind(R.id.meal_spinner) Spinner mealSpinner;
+    @Bind(R.id.meal_spinner_sub_choice) Spinner mealSubChoice;
+    @Bind(R.id.pid_layout) RelativeLayout pidLayout;
+
+    @Bind(R.id.k_param) EditText kParamEditTxt;
+    @Bind(R.id.i_param) EditText iParamEditTxt;
+    @Bind(R.id.d_param) EditText dParamEditTxt;
     // TODO: Rename and change types of parameters
 
     List<Entree> entrees;
@@ -66,6 +70,10 @@ public class SousVideFragment extends Fragment {
 
 //    private OnFragmentInteractionListener mListener;
     private ShivVidePost sousVideParams;
+
+    private Subscription kParamSubscription;
+    private Subscription iParamSubscription;
+    private Subscription dParamSubscription;
 
     /**
      * Use this factory method to create a new instance of
@@ -120,18 +128,82 @@ public class SousVideFragment extends Fragment {
             }
             advView = pref;
         }
+
+        // TODO: Clean this up into a function and some more modularity
+        kParamSubscription = WidgetObservable.text(kParamEditTxt)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .map(
+                        onTextChangeEvent -> {
+                            String input = onTextChangeEvent.text().toString();
+                            double param;
+                            try {
+                                param = Double.parseDouble(input);
+                            } catch (NumberFormatException nfe) {
+                                param = 4.0;
+                            }
+
+                            return param;
+                        })
+                .subscribe(sousVideParams::setK_param);
+
+        iParamSubscription = WidgetObservable.text(iParamEditTxt)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .map(
+                        onTextChangeEvent -> {
+                            String input = onTextChangeEvent.text().toString();
+                            double param;
+                            try {
+                                param = Double.parseDouble(input);
+                            } catch (NumberFormatException nfe) {
+                                param = 4.0;
+                            }
+
+                            return param;
+                        })
+                .subscribe(sousVideParams::setI_param);
+
+        dParamSubscription = WidgetObservable.text(dParamEditTxt)
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
+                .map(
+                        onTextChangeEvent -> {
+                            String input = onTextChangeEvent.text().toString();
+                            double param;
+                            try {
+                                param = Double.parseDouble(input);
+                            } catch (NumberFormatException nfe) {
+                                param = 4.0;
+                            }
+
+                            return param;
+                        })
+                .subscribe(sousVideParams::setD_param);
+
+
+    }
+
+    @Override
+    public void onPause() {
+        //TODO: Combine into a single subscription
+        if(kParamSubscription != null && !kParamSubscription.isUnsubscribed()) {
+            kParamSubscription.unsubscribe();
+        }
+        if(iParamSubscription != null && !iParamSubscription.isUnsubscribed()) {
+            iParamSubscription.unsubscribe();
+        }
+        if(dParamSubscription != null && !dParamSubscription.isUnsubscribed()) {
+            dParamSubscription.unsubscribe();
+        }
+
+        super.onPause();
+
     }
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
     }
 
     private void setupMealSpinner() {
