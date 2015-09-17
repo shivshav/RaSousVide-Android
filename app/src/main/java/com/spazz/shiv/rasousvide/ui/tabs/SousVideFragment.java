@@ -1,8 +1,8 @@
 package com.spazz.shiv.rasousvide.ui.tabs;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -38,13 +38,10 @@ import rx.schedulers.Schedulers;
 
 /**
  * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SousVideFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
  * Use the {@link SousVideFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SousVideFragment extends Fragment {
+public class SousVideFragment extends Fragment{
     private static final String TAG = "SousVideFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -66,7 +63,9 @@ public class SousVideFragment extends Fragment {
     Meal selectedMeal;
 
     SharedPreferences prefs;
-    public boolean advView;
+    private boolean advView;
+    private boolean showCelsius;
+
 
 //    private OnFragmentInteractionListener mListener;
     private ShivVidePost sousVideParams;
@@ -98,8 +97,8 @@ public class SousVideFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         sousVideParams = new ShivVidePost("Auto");
+
     }
 
     @Override
@@ -107,27 +106,21 @@ public class SousVideFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_sous_vide, container, false);
         ButterKnife.bind(this, rootView);
+
         ViewCompat.setElevation(rootView, 50);
+
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
         seekArcTemp.setProgress(0);
-        //seekTempText.setText("Placeholder son!");
         setupMealSpinner();
-        advView = prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false);
 
         return rootView;
     }
+
     @Override
     public void onResume() {
         super.onResume();
-        boolean pref = prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false);
-        if(advView != pref) {
-            if (pref) {
-                pidLayout.setVisibility(View.VISIBLE);
-            } else {
-                pidLayout.setVisibility(View.GONE);
-            }
-            advView = pref;
-        }
+
+        setupPreferences(this.getActivity());
 
         // TODO: Clean this up into a function and some more modularity
         kParamSubscription = WidgetObservable.text(kParamEditTxt)
@@ -183,6 +176,7 @@ public class SousVideFragment extends Fragment {
 
 
     }
+
 
     @Override
     public void onPause() {
@@ -261,12 +255,31 @@ public class SousVideFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
 //        try {
 //            mListener = (OnFragmentInteractionListener) activity;
 //        } catch (ClassCastException e) {
 //            throw new ClassCastException(activity.toString()
 //                    + " must implement OnFragmentInteractionListener");
 //        }
+    }
+
+    private void setupPreferences(Context context){
+
+        Log.d(TAG, "Preference setup");
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        // Initialize preferences
+        advView = prefs.getBoolean(SettingsActivity.KEY_PREF_GENERAL_ADV_VIEW, false);
+        showCelsius = prefs.getBoolean(SettingsActivity.KEY_PREF_GENERAL_TEMP_UNITS, false);
+
+        // Preferences
+        if (advView) {
+            pidLayout.setVisibility(View.VISIBLE);
+        } else {
+            pidLayout.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -46,7 +46,8 @@ public class SettingsActivity extends PreferenceActivity  {
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
 
-    public static final String KEY_PREF_ADV_VIEW = "advanced_switch";
+    public static final String KEY_PREF_GENERAL_ADV_VIEW = "advanced_switch";
+    public static final String KEY_PREF_GENERAL_TEMP_UNITS = "temperature_switch";
     public static final String KEY_PREF_PI_USE_DOMAIN = "pi_use_domain";
     public static final String KEY_PREF_PI_DOMAIN_NAME = "pi_domain_name";
     public static final String KEY_PREF_PI_IP = "pi_ip";
@@ -120,7 +121,7 @@ public class SettingsActivity extends PreferenceActivity  {
         // to reflect the new value, per the Android Design guidelines.
 //        bindPreferenceSummaryToValue(findPreference("example_text"));
 
-//        bindPreferenceSummaryToValue(findPreference(KEY_PREF_ADV_VIEW));
+//        bindPreferenceSummaryToValue(findPreference(KEY_PREF_GENERAL_ADV_VIEW));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_DOMAIN_NAME));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_IP));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_PORT));
@@ -142,9 +143,9 @@ public class SettingsActivity extends PreferenceActivity  {
 
         //TODO: Port these changes over to small screen variant
         //TODO: Find an easier way to do this
-        final SwitchPreference domainSwitch = (SwitchPreference) findPreference("pi_use_domain");
+        final SwitchPreference domainSwitch = (SwitchPreference) findPreference(KEY_PREF_PI_USE_DOMAIN);
 
-        final EditTextPreference domainText = (EditTextPreference) findPreference("pi_domain_name");
+        final EditTextPreference domainText = (EditTextPreference) findPreference(KEY_PREF_PI_DOMAIN_NAME);
         final EditTextPreference ipAddr = (EditTextPreference) findPreference(KEY_PREF_PI_IP);
         final EditTextPreference port = (EditTextPreference) findPreference(KEY_PREF_PI_PORT);
 
@@ -346,20 +347,17 @@ public class SettingsActivity extends PreferenceActivity  {
             ipAddr.setEnabled(!domainSwitch.isChecked());
             port.setEnabled(!domainSwitch.isChecked());
 
-            domainSwitch.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    if(preference instanceof SwitchPreference) {
-                        boolean useDomain = ((SwitchPreference) preference).isChecked();
+            domainSwitch.setOnPreferenceClickListener(preference -> {
+                if(preference instanceof SwitchPreference) {
+                    boolean useDomain = ((SwitchPreference) preference).isChecked();
 
-                        ipAddr.setEnabled(!useDomain);
-                        port.setEnabled(!useDomain);
-                        domainText.setEnabled(useDomain);
+                    ipAddr.setEnabled(!useDomain);
+                    port.setEnabled(!useDomain);
+                    domainText.setEnabled(useDomain);
 
-                        return true;
-                    }
-                    return false;
+                    return true;
                 }
+                return false;
             });
         }
     }
