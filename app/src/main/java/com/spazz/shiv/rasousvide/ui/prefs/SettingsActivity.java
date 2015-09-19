@@ -236,7 +236,7 @@ public class SettingsActivity extends PreferenceActivity  {
                 MultiSelectListPreference listPreference = (MultiSelectListPreference) preference;
                 Set<String> chosenSet = (Set<String>) value;
 
-                StringBuilder sb = new StringBuilder(chosenSet.size());
+                StringBuilder sb = new StringBuilder(chosenSet.size() * 2);//Because we will add at most a comma for every entry - 1
 
                 int idx = 0;
                 for(Iterator<String> it = chosenSet.iterator(); it.hasNext();) {
