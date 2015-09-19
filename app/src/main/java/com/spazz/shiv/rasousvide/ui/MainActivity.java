@@ -141,8 +141,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     public void onResume() {
         super.onResume();
-        if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_ADV_VIEW, false)) {
-            mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_ADV_VIEW);
+        if(mAdapter.getAdvancedVIew() != prefs.getBoolean(SettingsActivity.KEY_PREF_GENERAL_ADV_VIEW, false)) {
+            mAdapter.updateTabTitles(prefs, SettingsActivity.KEY_PREF_GENERAL_ADV_VIEW);
         }
         Log.d(TAG, "onResume of Activity run");
 
@@ -697,7 +697,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         private boolean advancedView = false;
         public TabsPagerAdapter(FragmentManager fm) {
             super(fm);
-            updateTabTitles(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()), SettingsActivity.KEY_PREF_ADV_VIEW);
+            updateTabTitles(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()), SettingsActivity.KEY_PREF_GENERAL_ADV_VIEW);
         }
 
         private String makeFragmentName(int viewPagerId, int index) {

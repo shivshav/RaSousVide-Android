@@ -10,4 +10,14 @@
         android:defaultValue="false"
         />
 
+    <SwitchPreference
+        android:key="temperature_switch"
+        android:title="Show temp in \u00b0C"
+        android:switchTextOff="\u00b0F"
+        android:switchTextOn="\u00b0C"
+        android:summaryOn="Temperatures will be shown in \u00b0C"
+        android:summaryOff="Temperatures will be shown in \u00b0F"
+        android:defaultValue="false"
+        />
+
 </PreferenceScreen>

@@ -26,6 +26,7 @@
 
         <item name="toolbarStyle">@style/ShivVideToolbar</item>
 
+        <!--TODO Edit the dialog style as well for its color scheme for at least the multi select listpreference-->
     </style>
 
     <style name="ShivVideToolbar" parent="Widget.AppCompat.Toolbar">
