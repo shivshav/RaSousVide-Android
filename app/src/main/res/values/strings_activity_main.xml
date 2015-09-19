@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_main">@string/app_name</string>
+
+    <string name="mode_off">Off</string>
+    <string name="mode_sous_vide">Sous-Vide</string>
+    <string name="mode_crockpot">Crockpot</string>
+    <string name="mode_manual">Manual</string>
+    <string name="mode_unknown">Disconnected</string>
+
+</resources>

@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         
-
+        //TODO: Resolve this
 //        if(isFirstTime()) {
 //            //Execute database setup here
 //            Entree.firstTimeMealSetup();
@@ -158,6 +158,31 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     private Subscription createPollingSubscription() {
         return cookingNotificationService.getPollingObservable()
+                .map(response1 -> {
+                    String curMode = response1.getMode();
+                    String mode;
+                    if("off".matches(curMode)) {
+                        mode = getResources().getString(R.string.mode_off);
+                        curMode = mode;
+                    }
+                    else if ("auto".matches(curMode)){
+                        mode = getResources().getString(R.string.mode_sous_vide);
+                        curMode = mode;
+                    }
+                    else if("crockpot".matches(curMode)){
+                        mode = getResources().getString(R.string.mode_crockpot);
+                        curMode = mode;
+                    }
+                    else if ("manual".matches(curMode)) {
+                        mode = getResources().getString(R.string.mode_manual);
+                        curMode = mode;
+                    }
+                    else {
+                        curMode = getResources().getString(R.string.mode_unknown);
+                    }
+                    response1.setMode(curMode);
+                    return response1;
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         (response) -> {
