@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
+import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
@@ -23,7 +24,10 @@ import android.text.TextUtils;
 import com.spazz.shiv.rasousvide.R;
 import com.spazz.shiv.rasousvide.rest.RestClient;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -54,7 +58,11 @@ public class SettingsActivity extends PreferenceActivity  {
     public static final String KEY_PREF_PI_PORT = "pi_port";
     public static final String KEY_PREF_PI_TEMP_REFRESH = "pi_on_refresh_rate";
     public static final String KEY_PREF_PI_MODE_REFRESH = "pi_off_refresh_rate";
-    public static final String KEY_PREF_NOTIFICATIONS_RINGTONE = "notifications_new_message_ringtone";
+    public static final String KEY_PREF_NOTIFICATIONS_ENABLE = "notifications_enable";
+    public static final String KEY_PREF_NOTIFICATIONS_RINGTONE = "notifications_ringtone";
+    public static final String KEY_PREF_NOTIFICATIONS_VIBRATE = "notifications_vibrate";
+    public static final String KEY_PREF_NOTIFICATIONS_NOTIFY_ON = "notifications_notify_on";
+
 
     public static final int DEFAULT_PREF_PI_TEMP_REFRESH = 5;
     public static final int DEFAULT_PREF_PI_MODE_REFRESH = 60;
@@ -130,7 +138,10 @@ public class SettingsActivity extends PreferenceActivity  {
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_PI_MODE_REFRESH));
 
 
+//        bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_ENABLE));
         bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_RINGTONE));
+//        bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_VIBRATE));
+        bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_NOTIFY_ON));
 
 //        bindPreferenceSummaryToValue(findPreference("example_list"));
 //        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
@@ -221,7 +232,33 @@ public class SettingsActivity extends PreferenceActivity  {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
+            if(preference instanceof MultiSelectListPreference) {
+                MultiSelectListPreference listPreference = (MultiSelectListPreference) preference;
+                Set<String> chosenSet = (Set<String>) value;
+
+                StringBuilder sb = new StringBuilder(chosenSet.size());
+
+                int idx = 0;
+                for(Iterator<String> it = chosenSet.iterator(); it.hasNext();) {
+                    String currentEntry;
+                    String index = it.next();
+
+                    try{
+                        idx = Integer.parseInt(index);
+                        currentEntry = listPreference.getEntries()[idx].toString();
+                    } catch (ClassCastException cce) {
+                        currentEntry = listPreference.getEntries()[idx].toString();
+                        idx++;
+                    }
+
+                    sb.append(currentEntry);
+                    if(it.hasNext()) {
+                        sb.append(", ");
+                    }
+                }
+                preference.setSummary(sb.toString());
+
+            } else if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in
                 // the preference's 'entries' list.
                 ListPreference listPreference = (ListPreference) preference;
@@ -279,12 +316,19 @@ public class SettingsActivity extends PreferenceActivity  {
 
         Object preferenceVal = null;
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(preference.getContext());
+
         try {
             String myString = preferences.getString(preference.getKey(), "");
             preferenceVal = myString;
+
         } catch (ClassCastException cce) {
-            Integer myInt = preferences.getInt(preference.getKey(), DEFAULT_PREF_PI_TEMP_REFRESH);
-            preferenceVal = myInt;
+            try {
+                Integer myInt = preferences.getInt(preference.getKey(), DEFAULT_PREF_PI_TEMP_REFRESH);
+                preferenceVal = myInt;
+            } catch (ClassCastException cce_inner) {
+                Set<String> myStringSet = preferences.getStringSet(preference.getKey(), null);
+                preferenceVal = myStringSet;
+            }
         }
 
         // Trigger the listener immediately with the preference's
@@ -377,7 +421,10 @@ public class SettingsActivity extends PreferenceActivity  {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
+//            bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_ENABLE));
             bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_RINGTONE));
+//            bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_VIBRATE));
+            bindPreferenceSummaryToValue(findPreference(KEY_PREF_NOTIFICATIONS_NOTIFY_ON));
         }
     }
 }
