@@ -118,6 +118,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:id="@+id/pid_divider"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:background="@drawable/divider"/>
                 <TextView
                     android:layout_width="match_parent"
