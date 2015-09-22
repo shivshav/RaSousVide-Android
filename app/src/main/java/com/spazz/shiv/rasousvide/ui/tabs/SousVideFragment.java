@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -24,7 +25,6 @@ import com.spazz.shiv.rasousvide.rest.model.ShivVidePost;
 import com.spazz.shiv.rasousvide.ui.prefs.SettingsActivity;
 import com.triggertrap.seekarc.SeekArc;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -34,6 +34,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.android.widget.WidgetObservable;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 
 /**
@@ -42,15 +43,22 @@ import rx.schedulers.Schedulers;
  * create an instance of this fragment.
  */
 public class SousVideFragment extends Fragment{
-    private static final String TAG = "SousVideFragment";
+    private static final String STATIC_TAG = "SousVideFragment";
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_POSITION = "position";
+    private static final String ARG_POSITION = "pagerAdapterPosition";
+
+    private static final String STATE_KEY_MEAL_ID = "meal_id";
 
     @Bind(R.id.seekArcTemp) SeekArc seekArcTemp;
     @Bind(R.id.seekTempText) TextView seekTempText;
-    @Bind(R.id.meal_spinner) Spinner mealSpinner;
-    @Bind(R.id.meal_spinner_sub_choice) Spinner mealSubChoice;
+
+    @Bind(R.id.meal_spinner) Spinner entreeSpinner;
+    ArrayAdapter<Entree> entreeAdapter;
+    @Bind(R.id.meal_spinner_sub_choice) Spinner mealSpinner;
+    ArrayAdapter<Meal> mealAdapter;
+
     @Bind(R.id.pid_layout) RelativeLayout pidLayout;
 
     @Bind(R.id.k_param) EditText kParamEditTxt;
@@ -60,19 +68,19 @@ public class SousVideFragment extends Fragment{
 
     List<Entree> entrees;
 
+    Entree selectedEntree;
     Meal selectedMeal;
+
+    private int pagerAdapterPosition;
+    private String TAG;
 
     SharedPreferences prefs;
     private boolean advView;
     private boolean showCelsius;
 
-
-//    private OnFragmentInteractionListener mListener;
     private ShivVidePost sousVideParams;
 
-    private Subscription kParamSubscription;
-    private Subscription iParamSubscription;
-    private Subscription dParamSubscription;
+    private CompositeSubscription rxSubscriptions;
 
     /**
      * Use this factory method to create a new instance of
@@ -99,6 +107,11 @@ public class SousVideFragment extends Fragment{
         super.onCreate(savedInstanceState);
         sousVideParams = new ShivVidePost("Auto");
 
+        Bundle fragArgs = getArguments();
+        if(fragArgs != null) {
+            pagerAdapterPosition = fragArgs.getInt(ARG_POSITION);
+        }
+        TAG = STATIC_TAG + ", Position " + pagerAdapterPosition;
     }
 
     @Override
@@ -110,17 +123,36 @@ public class SousVideFragment extends Fragment{
         ViewCompat.setElevation(rootView, 50);
 
         seekArcTemp.setOnSeekArcChangeListener(new MyOnSeekArcChangeListener());
-        seekArcTemp.setProgress(0);
-        setupMealSpinner();
+
+        setupMealSpinner(rootView.getContext());
 
         return rootView;
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            Long mealId = savedInstanceState.getLong(STATE_KEY_MEAL_ID);
+            selectedMeal = Meal.findById(Meal.class, mealId);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        Subscription kParamSubscription;
+        Subscription iParamSubscription;
+        Subscription dParamSubscription;
+
         setupPreferences(this.getActivity());
+
+        // We have to always create a new CompositeSubscription Object as described here
+        // http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
+        rxSubscriptions = new CompositeSubscription();
+
 
         // TODO: Clean this up into a function and some more modularity
         kParamSubscription = WidgetObservable.text(kParamEditTxt)
@@ -139,6 +171,7 @@ public class SousVideFragment extends Fragment{
                             return param;
                         })
                 .subscribe(sousVideParams::setK_param);
+        rxSubscriptions.add(kParamSubscription);
 
         iParamSubscription = WidgetObservable.text(iParamEditTxt)
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -156,6 +189,7 @@ public class SousVideFragment extends Fragment{
                             return param;
                         })
                 .subscribe(sousVideParams::setI_param);
+        rxSubscriptions.add(iParamSubscription);
 
         dParamSubscription = WidgetObservable.text(dParamEditTxt)
                 .subscribeOn(AndroidSchedulers.mainThread())
@@ -173,46 +207,52 @@ public class SousVideFragment extends Fragment{
                             return param;
                         })
                 .subscribe(sousVideParams::setD_param);
-
-
+        rxSubscriptions.add(dParamSubscription);
     }
 
 
     @Override
     public void onPause() {
         //TODO: Combine into a single subscription
-        if(kParamSubscription != null && !kParamSubscription.isUnsubscribed()) {
-            kParamSubscription.unsubscribe();
+        if(rxSubscriptions.hasSubscriptions()) {
+            rxSubscriptions.unsubscribe();
         }
-        if(iParamSubscription != null && !iParamSubscription.isUnsubscribed()) {
-            iParamSubscription.unsubscribe();
-        }
-        if(dParamSubscription != null && !dParamSubscription.isUnsubscribed()) {
-            dParamSubscription.unsubscribe();
-        }
+
+        // We have to always create a new CompositeSubscription Object as described here
+        // http://blog.danlew.net/2014/10/08/grokking-rxjava-part-4/
+        rxSubscriptions = null;
 
         super.onPause();
-
     }
+
+    public void onSaveInstanceState(Bundle outState){
+
+        // All state can be restored from saving the currently selected meal
+        outState.putLong(STATE_KEY_MEAL_ID, selectedMeal.getId());
+
+        super.onSaveInstanceState(outState);
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         ButterKnife.unbind(this);
     }
 
-    private void setupMealSpinner() {
+    private void setupMealSpinner(Context context) {
+
+        // RX Necessary
         entrees = Entree.listAll(Entree.class);
-        List<String> entreeNames = new ArrayList<>(entrees.size());
 
-        for(Entree e: entrees) {
-            entreeNames.add(e.getEntreeName());
-        }
+        // Setup meal spinner first so that we may set the entree/meal relationship correctly on start
+        mealAdapter = new ArrayAdapter<>(context, R.layout.spinner_item);
+        mealAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        mealSpinner.setAdapter(mealAdapter);
 
-        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.spinner_item, entreeNames); //selected item will look like a spinner set from XML
-        spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        mealSpinner.setAdapter(spinnerArrayAdapter);
-        mealSpinner.setSelection(0);
-
+        // Now set up the entree spinner
+        entreeAdapter = new ArrayAdapter<>(context, R.layout.spinner_item, entrees);
+        entreeAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        entreeSpinner.setAdapter(entreeAdapter);
     }
 
     public ShivVidePost getSousVideParams() {
@@ -221,21 +261,50 @@ public class SousVideFragment extends Fragment{
 
     @OnItemSelected(value = R.id.meal_spinner, callback = OnItemSelected.Callback.ITEM_SELECTED)
     void entreeSelected(int position) {
-        List<Meal> meals = entrees.get(position).getMeals();
-        if(meals != null && meals.get(0).getMealType() != null) {
-            mealSubChoice.setVisibility(View.VISIBLE);
-            List<String> mealTypes = new ArrayList<>(meals.size());
-            for (Meal meal : meals) {
-                mealTypes.add(meal.getMealType());
+        selectedEntree = entrees.get(position);
+        Log.d(TAG, "Selected entree is " + selectedEntree.getEntreeName());
+        List<Meal> meals = selectedEntree.getMeals();
+
+        if(meals != null && meals.size() > 1) {// If there is more than one way to cook the meal
+
+            if(!mealAdapter.isEmpty()) {
+                mealAdapter.clear();
             }
-            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getActivity().getApplicationContext(), R.layout.spinner_item, mealTypes); //selected item will look like a spinner set from XML
-            spinnerArrayAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-            mealSubChoice.setAdapter(spinnerArrayAdapter);
+            mealAdapter.addAll(meals);
+            mealAdapter.notifyDataSetChanged();
+            mealSpinner.setAdapter(mealAdapter);
+
+            // Purely for device orientation changes.
+            // FIXME: This should be optimized. It probably doesn't lend to very fast orientation switches
+            if(selectedMeal != null && selectedMeal.getEntree().getId().equals(selectedEntree.getId())) {
+                /*
+                 * Why Did I Do This?
+                 * If we have a meal whose entree has the same ID as the one that just got selected,
+                 * and we are inside the ItemSelected Callback, that means an entree was selected
+                 * whose meal had already been chosen, this SHOULD only happen because of device
+                 * orientations changes, otherwise selectedMeal getting set is purely a dependency
+                 * on selectedEntree and one of it's meals
+                 */
+
+                ArrayAdapter<Meal> arrayAdapter = (ArrayAdapter<Meal>) mealSpinner.getAdapter();
+
+                for (int i = 0; i < arrayAdapter.getCount(); i++) {
+
+                    if(arrayAdapter.getItem(i).getId().equals(selectedMeal.getId())) {
+                        mealSpinner.setSelection(i);
+                        break;
+                    }
+                }
+            }
+
+            mealSpinner.setVisibility(View.VISIBLE);
         }
-        else {
-            mealSubChoice.setVisibility(View.GONE);
-            mealSubChoice.setSelection(0);
-            mealSubChoice.setAdapter(null);
+        else {// We only have one option to cook this meal (i.e. Chicken)
+            mealAdapter.clear();
+            mealAdapter.notifyDataSetChanged();
+
+            mealSpinner.setVisibility(View.GONE);
+
             if(meals != null) {
                 selectedMeal = meals.get(0);
                 Log.d(TAG, "Selected meal has no name with setpoint " + meals.get(0).getSetPoint());
@@ -245,8 +314,9 @@ public class SousVideFragment extends Fragment{
     }
 
     @OnItemSelected(value = R.id.meal_spinner_sub_choice, callback = OnItemSelected.Callback.ITEM_SELECTED)
-    void mealSelected(int position) {
-        selectedMeal = entrees.get(mealSpinner.getSelectedItemPosition()).getMeals().get(position);
+    void mealSelected(AdapterView<?> parent, int position) {
+
+        selectedMeal = selectedEntree.getMeals().get(position);
         Log.d(TAG, "Selected Meal is " + selectedMeal.getMealType());
         seekArcTemp.setProgress((int) selectedMeal.getSetPoint());
     }
@@ -255,18 +325,11 @@ public class SousVideFragment extends Fragment{
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-//        try {
-//            mListener = (OnFragmentInteractionListener) activity;
-//        } catch (ClassCastException e) {
-//            throw new ClassCastException(activity.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
     }
 
     private void setupPreferences(Context context){
 
-        Log.d(TAG, "Preference setup");
+        Log.d(TAG,"Preference setup");
 
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -285,7 +348,6 @@ public class SousVideFragment extends Fragment{
     @Override
     public void onDetach() {
         super.onDetach();
-//        mListener = null;
     }
 
     private class MyOnSeekArcChangeListener implements SeekArc.OnSeekArcChangeListener {
@@ -305,21 +367,4 @@ public class SousVideFragment extends Fragment{
             sousVideParams.setSet_point(progress);
         }
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        public void onFragmentInteraction(Uri uri);
-//    }
-
-
 }

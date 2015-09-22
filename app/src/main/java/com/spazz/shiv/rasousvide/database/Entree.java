@@ -53,9 +53,16 @@ public class Entree extends SugarRecord {
         this.entreeName = entreeName;
     }
 
+
     public List<Meal> getMeals() {
         return Meal.find(Meal.class, "entree = ?", this.getId().toString());
     }
+
+    @Override
+    public String toString(){
+        return this.getEntreeName();
+    }
+
     public static void firstTimeMealSetup() {
         for (int i = 0; i < INITIAL_ENTREES.length; i++) {
             INITIAL_ENTREES[i].save();

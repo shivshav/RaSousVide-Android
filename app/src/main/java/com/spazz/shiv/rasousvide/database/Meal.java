@@ -94,4 +94,8 @@ public class Meal extends SugarRecord {
         this.iParam = iParam;
     }
 
+    @Override
+    public String toString(){
+        return this.getMealType();
+    }
 }
